@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  application:
+    env_file:
+      - ../.env  # Caminho relativo para a pasta raiz
+    build: .
+    ports: 
+      - "${PORT_API_CONTROLE}:${PORT_API_CONTROLE}"
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}  # Mesma configuração do banco
+      - DB_HOST=${DB_HOST}
+      - JWT_SECRET=${JWT_SECRET}
+    volumes:
+      - .:/modulo-controle
+      - /modulo-controle/node_modules
+#      - ../../modulo-cadastro/backend-cadastro/src/shared.models:/backend-controle/src/shared.models
+
+    container_name: modulo-controle
+    restart: always
+
+    networks:
+      - helius_net
+
+networks:
+  helius_net:
+    external: true
