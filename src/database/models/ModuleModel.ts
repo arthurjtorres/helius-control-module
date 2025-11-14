@@ -1,0 +1,59 @@
+import { DataTypes, Model } from "sequelize";
+import db from ".";
+import sequelize from "sequelize";
+
+class ModuleModel extends Model {
+  declare moduleId: string;
+  declare moduleName: string;
+  declare moduleDescription: string;
+
+  declare createdAt: Date;
+  declare createdBy: string;
+  declare updatedAt: Date;
+  declare updatedBy: string;
+}
+
+ModuleModel.init({
+  moduleId: {
+    type: DataTypes.UUID,
+    primaryKey: true,
+    defaultValue: DataTypes.UUIDV4,
+    allowNull: false,
+  },
+  moduleName: {
+    type: sequelize.STRING,
+    allowNull: false,
+  },
+  moduleDescription: {
+    type: sequelize.STRING,
+    allowNull: false,
+  },
+
+  createdAt: {
+    allowNull: false,
+    type: sequelize.DATE,
+    defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
+  },
+  createdBy: {
+    allowNull: false,
+    type: DataTypes.UUID,
+
+  },
+  updatedAt: {
+    allowNull: false,
+    type: sequelize.DATE,
+    defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
+  },
+  updatedBy: {
+    allowNull: false,
+    type: DataTypes.UUID,
+  },
+}, {
+  sequelize: db,
+  tableName: 'module',
+  schema: 'access_control',
+  timestamps: false,
+  underscored: true
+});
+
+export default ModuleModel;
