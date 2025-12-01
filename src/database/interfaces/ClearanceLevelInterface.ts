@@ -1,5 +1,5 @@
 export default interface ClearanceLevelInterface {
-  clearanceId?: string; // gerado automaticamente
+  clearanceId?: string; 
   clearanceName: string;
 
   createdAt: Date;
