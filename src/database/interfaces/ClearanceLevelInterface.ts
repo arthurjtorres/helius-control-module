@@ -7,4 +7,3 @@ export default interface ClearanceLevelInterface {
   updatedAt?: Date;
   updatedBy?: string;
 }
-
