@@ -2,13 +2,16 @@ import { ModelStatic, Op } from "sequelize";
 import AppRolePermitModel from "../database/models/AppRolePermitModel";
 import AppRolePermitInterface from "../database/interfaces/AppRolePermitInterface";
 import Response from "../utils/Response";
-import Validation from "./validations/CreateValidationSchema";
+import CreateValidationSchema from "./validations/CreateValidationSchema";
+import UpdateValidationSchema from "./validations/UpdateValidationSchema";
 
 class AppRolePermitService {
   private model: ModelStatic<AppRolePermitModel> = AppRolePermitModel;
 
   async createAppRolePermit(data: AppRolePermitInterface) {
-    const { error } = Validation.AppRolePermitValidation.validate(data);
+    data.createdAt = new Date();
+    const { error } = CreateValidationSchema.AppRolePermitValidation.validate(data);
+    
     if (error) return Response.badRequest(error.message);
 
     await this.model.create({ ...data });
@@ -16,7 +19,10 @@ class AppRolePermitService {
   }
 
   async updateAppRolePermit(id: string, data: Partial<AppRolePermitInterface>) {
-    const { error } = Validation.AppRolePermitValidation.validate(data);
+    if(!id) return Response.badRequest("ID não informado");
+    data.updatedAt = new Date();
+
+    const { error } = UpdateValidationSchema.UpdateValidation.validate(data);    
     if (error) return Response.badRequest(error.message);
 
     const [updated] = await this.model.update(data, {
