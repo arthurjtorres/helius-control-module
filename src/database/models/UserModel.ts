@@ -22,6 +22,7 @@ class UserModel extends Model {
   declare createdBy: string;
   declare updatedAt: Date;
   declare updatedBy: string;
+  declare activated: boolean;
 
 }
 
@@ -80,6 +81,11 @@ UserModel.init({
   updatedBy: {
     allowNull: false,
     type: DataTypes.UUID,
+  },
+  activated: {
+    allowNull: false,
+    type: sequelize.BOOLEAN,
+    defaultValue: true,
   },
 }, {
   sequelize: db,

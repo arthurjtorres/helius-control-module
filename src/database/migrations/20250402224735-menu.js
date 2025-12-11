@@ -65,6 +65,11 @@ module.exports = {
           onUpdate: "CASCADE",
           onDelete: "CASCADE",
         },
+        activated: {
+          allownull: false,
+          type: Sequelize.BOOLEAN,
+          defaultValue: true,
+        },
       },
       {
         schema: "app_access",
