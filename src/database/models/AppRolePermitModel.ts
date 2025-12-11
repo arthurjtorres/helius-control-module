@@ -15,6 +15,7 @@ class AppRolePermitModel extends Model {
   declare createdBy: string;
   declare updatedAt: Date;
   declare updatedBy: string;
+  declare activated: boolean;
 }
 
 AppRolePermitModel.init({
@@ -26,7 +27,7 @@ AppRolePermitModel.init({
   },
   fkAppRoleId: {
     type: DataTypes.UUID,
-    allowNull: false,
+    allowNull: false, //foreign key
     references: {
       model: 'app_role',
       key: 'app_role_id',
@@ -73,6 +74,11 @@ AppRolePermitModel.init({
   updatedBy: {
     allowNull: false,
     type: DataTypes.UUID,
+  },
+  activated: {
+    allowNull: false,
+    type: sequelize.BOOLEAN,
+    defaultValue: true,
   },
 }, {
   sequelize: db,

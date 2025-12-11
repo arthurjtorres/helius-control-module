@@ -15,6 +15,7 @@ class UserAppRoleModel extends Model {
   declare createdBy: string;
   declare updatedAt: Date;
   declare updatedBy: string;
+  declare activated: boolean;
 }
 
 UserAppRoleModel.init({
@@ -73,6 +74,11 @@ UserAppRoleModel.init({
   updatedBy: {
     allowNull: false,
     type: DataTypes.UUID,
+  },
+  activated: {
+    allowNull: false,
+    type: sequelize.BOOLEAN,
+    defaultValue: true,
   },
 }, {
   sequelize: db,
