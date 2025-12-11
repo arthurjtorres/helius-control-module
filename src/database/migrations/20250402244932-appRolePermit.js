@@ -4,7 +4,7 @@ const { DataTypes } = require('sequelize');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     await queryInterface.createTable(
       'app_role_permit',
       {
@@ -16,7 +16,7 @@ module.exports = {
         },
         fk_app_role_id: {
           type: DataTypes.UUID,
-          allowNull:false,
+          allowNull: false,
           references: {
             model: 'app_role',
             key: 'app_role_id',
@@ -26,7 +26,7 @@ module.exports = {
         },
         fk_menu_id: {
           type: DataTypes.UUID,
-          allowNull:false,
+          allowNull: false,
           references: {
             model: 'menu',
             key: 'menu_id',
@@ -35,8 +35,8 @@ module.exports = {
           onDelete: 'CASCADE',
         },
         fk_permit_id: {
-         type: DataTypes.UUID,
-          allowNull:false,
+          type: DataTypes.UUID,
+          allowNull: false,
           references: {
             model: 'permit',
             key: 'permit_id',
@@ -81,6 +81,11 @@ module.exports = {
           onUpdate: "CASCADE",
           onDelete: "CASCADE",
         },
+        activated: {
+          allownull: false,
+          type: Sequelize.BOOLEAN,
+          defaultValue: true,
+        },
       },
       {
         schema: 'access_control'
@@ -88,7 +93,7 @@ module.exports = {
     )
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('app_role_permit', {
       schema: 'access_control'
     })
