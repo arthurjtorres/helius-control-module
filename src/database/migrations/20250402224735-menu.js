@@ -72,14 +72,14 @@ module.exports = {
         },
       },
       {
-        schema: "app_access",
+        schema: "access_control",
       }
     );
   },
 
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable("menu", {
-      schema: "app_access",
+      schema: "access_control",
     });
   },
 };
