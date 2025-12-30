@@ -2,8 +2,8 @@ import app from "./app";
 import "dotenv/config";
 import './database/connection';
 
-const PORT = process.env.PORT_API_CADASTRO || 2000;
+const PORT = process.env.PORT_API_CONTROLE || 2010;
 
 app.listen(PORT, () => {
-  console.log(`API Cadastro rodando na porta ${PORT}`);
+  console.log(`API Controle rodando na porta ${PORT}`);
 });
