@@ -54,14 +54,15 @@ class UserService {
   async updateUser(userId: string, data: Partial<UserInterface>) {
     if (!userId) return Response.badRequest("ID do usuário não informado");
 
+    data.updatedAt = new Date();
+
+    const { error } = UpdateValidationSchema.UpdateUserValidation.validate(data);
+    if (error) return Response.badRequest(error.message);
+
     if (data.password) {
       data.password = md5(data.password);
     }
-    data.updatedAt = new Date();
-
-    const { error } = UpdateValidationSchema.UpdateValidation.validate(data);
-    if (error) return Response.badRequest(error.message);
-
+    
     const [updated] = await this.model.update(data, { where: { userId } });
     if (!updated) return Response.notFound("Usuário não encontrado!");
 
