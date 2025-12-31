@@ -1,4 +1,3 @@
-import UserService from './UserService'; // você já tem esse service
 import { sign } from '../jwt/jwt'; // onde está a função de assinar tokens
 import Response from '../utils/Response';
 import { ModelStatic, Op } from 'sequelize';
