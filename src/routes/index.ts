@@ -12,7 +12,7 @@ import userModuleRouter from "./UserModuleRouter";
 import authRouter from "./AuthRouter";
 
 const router = Router();
-router.use("/auth", authRouter);
+router.use("/authenticate", authRouter);
 
 router.use("/users", userRouter);
 router.use("/modules", moduleRouter);
