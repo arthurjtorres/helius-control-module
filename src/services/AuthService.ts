@@ -25,6 +25,7 @@ class AuthService {
 
     const payload = {
       userId: user.userId,
+      userName: user.userName,
       email: user.email,
       userType: user.userType,
       fkClearanceId: user.fkClearanceId,
