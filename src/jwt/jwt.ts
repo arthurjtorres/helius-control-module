@@ -7,6 +7,7 @@ const secret = process.env.JWT_SECRET as string
 
 interface JwtPayload {
   userId: string;
+  userName: string;
   email: string;
   userType: string;
   fkClearanceId: string;
