@@ -1,7 +1,7 @@
 import joi from "joi";
 
 const AppRoleValidation = joi.object({
-  AppRoleName: joi.string().required(),
+  appRoleName: joi.string().required(),
 
   createdAt: joi.date().required(),
   createdBy: joi.string().required(),
