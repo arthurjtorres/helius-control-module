@@ -1,7 +1,7 @@
 import  jwt, { SignOptions }  from "jsonwebtoken";
 import 'dotenv/config';
 import { NextFunction, Request, Response } from "express";
-import Resp from "../utils/Response";
+import Resp from "../../utils/Response";
 
 const secret = process.env.JWT_SECRET as string
 

@@ -8,9 +8,8 @@ class AuthController {
   async login(req: Request, res: Response, next: NextFunction) {
     try {
 
-      const login = req.headers['x-auth-user'] as string;
-      const password = req.headers['x-auth-pass'] as string;
-      
+      const authHeader = req.headers['authorization'] as string || "";
+      const [ password, login ] = atob(authHeader).split(';');      
 
       if (!login || !password) {
         const resp = Resp.badRequest('Login e senha são obrigatórios');
