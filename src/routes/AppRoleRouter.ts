@@ -1,17 +1,18 @@
 import { Router } from "express";
 import AppRoleController from "../controllers/AppRoleController";
+import { verifyToken } from "./middlewares/Authentication";
 
 const appRoleRouter = Router();
 const controller = new AppRoleController();
 
 // POST - Criar função de aplicativo
-appRoleRouter.post("/", controller.createAppRole.bind(controller));
+appRoleRouter.post("/", verifyToken, controller.createAppRole.bind(controller));
 
 // PUT - Atualizar função por ID
-appRoleRouter.put("/:id", controller.updateAppRole.bind(controller));
+appRoleRouter.put("/:id", verifyToken, controller.updateAppRole.bind(controller));
 
 // DELETE - Remover função por ID
-appRoleRouter.delete("/:id", controller.deleteAppRole.bind(controller));
+appRoleRouter.delete("/:id", verifyToken, controller.deleteAppRole.bind(controller));
 
 // GET - Buscar função por ID
 appRoleRouter.get("/:id", controller.getAppRole.bind(controller));
