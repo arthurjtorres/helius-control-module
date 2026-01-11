@@ -1,4 +1,4 @@
-import { sign } from '../jwt/jwt'; // onde está a função de assinar tokens
+import { sign } from '../routes/middlewares/Authentication'; // onde está a função de assinar tokens
 import Response from '../utils/Response';
 import { ModelStatic, Op } from 'sequelize';
 import UserModel from '../database/models/UserModel';
