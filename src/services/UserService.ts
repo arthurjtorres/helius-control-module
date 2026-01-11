@@ -88,7 +88,9 @@ class UserService {
       }
 
       await transaction.commit();
-      const result = await this.model.findByPk(userId);
+      const result = await this.model.findByPk(userId, {
+        attributes: { exclude: ['password']}
+      });
       return Response.ok("Usuário atualizado com sucesso!", result);
 
     } catch (error: any) {
