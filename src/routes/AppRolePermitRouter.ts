@@ -1,6 +1,6 @@
 import { Router } from "express";
 import AppRolePermitController from "../controllers/AppRolePermitController";
-import { verifyToken } from "../jwt/jwt";
+import { verifyToken } from "./middlewares/Authentication";
 
 const appRolePermitRouter = Router();
 const controller = new AppRolePermitController();
