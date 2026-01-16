@@ -1,6 +1,6 @@
 import { Router } from "express";
 import MenuController from "../controllers/MenuController";
-import { verifyToken } from "./middlewares/Authentication";
+import { verifyToken } from "../middlewares/Authentication";
 
 const menuRouter = Router();
 const controller = new MenuController();

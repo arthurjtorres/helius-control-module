@@ -1,6 +1,6 @@
 import { Router } from "express";
 import PermitController from "../controllers/PermitController";
-import { verifyToken } from "./middlewares/Authentication";
+import { verifyToken } from "../middlewares/Authentication";
 
 const permitRouter = Router();
 const controller = new PermitController();

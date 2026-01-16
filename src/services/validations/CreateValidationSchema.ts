@@ -1,4 +1,5 @@
 import joi from "joi";
+import { PermissionEnum } from "../../database/models/enums/PermissionEnum";
 
 const AppRoleValidation = joi.object({
   appRoleName: joi.string().required(),
@@ -32,6 +33,15 @@ const ModuleValidation = joi.object({
 
 const PermitValidation = joi.object({
   permitName: joi.string().required(),
+  // Valida que é um array, não vazio, contendo apenas valores do Enum
+  permitList: joi.array()
+    .items(joi.string().valid(...Object.values(PermissionEnum)))
+    .min(1)
+    .required()
+    .messages({
+      'any.only': 'Uma ou mais permissões fornecidas são inválidas.',
+      'array.min': 'O campo permitList deve conter pelo menos uma permissão.'
+    }),
 
   createdAt: joi.date().required(),
   createdBy: joi.string().required(),
