@@ -6,8 +6,27 @@ import "dotenv/config";
 const app = express();
 
 // 1. O CORS DEVE VIR PRIMEIRO DE TUDO
+const allowedOrigins = [
+  process.env.API_host + ':' + process.env.PORT_WEB_MODULE,
+  'http://localhost:' + process.env.PORT_WEB_MODULE,
+  'http://127.0.0.1:' + process.env.PORT_WEB_MODULE,
+]
 app.use(cors({
-  origin: 'http://localhost:1100',
+
+  origin: function (origin, callback) {
+    // 1. Permite requisições sem 'origin' (ex: Postman ou apps mobile)
+    if (!origin) return callback(null, true);
+
+    // 2. Verifica se a origem está na lista fixa OU se é um IP de rede local
+    const isLocalNetwork = origin.startsWith('http://10.10.') || origin.startsWith('http://192.168.');
+    const isAllowed = allowedOrigins.indexOf(origin) !== -1;
+
+    if (isLocalNetwork || isAllowed) {
+      callback(null, true);      
+    } else {
+      callback(new Error('Bloqueado pelo CORS: Origem não permitida.'))
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Auth-User', 'X-Auth-Pass', 'Accept'],
   credentials: true,

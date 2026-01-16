@@ -2,9 +2,11 @@ import { DataTypes, Model } from "sequelize";
 import db from ".";
 import sequelize from "sequelize";
 import { PermissionEnum } from "./enums/PermissionEnum";
+
 class PermitModel extends Model {
   declare permitId: string;
-  declare permitName: PermissionEnum;
+  declare permitName: string;
+  declare permitList: PermissionEnum[];
 
   declare createdAt: Date;
   declare createdBy: string;
@@ -20,12 +22,16 @@ PermitModel.init({
     defaultValue: DataTypes.UUIDV4,
     allowNull: false,
   },
+  
   permitName: {
     type: sequelize.STRING,
     allowNull: false,
-    validate: {
-      isIn: [[...Object.values(PermissionEnum)]],
-    }
+  },
+  permitList: {
+    type: DataTypes.ARRAY(DataTypes.STRING),
+    allowNull: false,
+    defaultValue:[],
+    
   },
 
   createdAt: {
