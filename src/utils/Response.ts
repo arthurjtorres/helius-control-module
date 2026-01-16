@@ -32,6 +32,11 @@ class Response {
     return { status: 401, message };
   }
 
+  static forbidden(customMessage: string): ErrorResponse {
+    const message: string = "Acesso negado: " + customMessage;
+    return { status: 403, message }
+  }
+
   static notFound(message: string): ErrorResponse {
     return { status: 404, message };
   }

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import AppRoleController from "../controllers/AppRoleController";
-import { verifyToken } from "./middlewares/Authentication";
+import { verifyToken } from "../middlewares/Authentication";
 
 const appRoleRouter = Router();
 const controller = new AppRoleController();

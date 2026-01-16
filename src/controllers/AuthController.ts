@@ -9,7 +9,8 @@ class AuthController {
     try {
 
       const authHeader = req.headers['authorization'] as string || "";
-      const [ password, login ] = atob(authHeader).split(';');      
+      const [ password, login ] = atob(authHeader).split(';');    
+      console.log("login:", login," - senha:" ,password)  
 
       if (!login || !password) {
         const resp = Resp.badRequest('Login e senha são obrigatórios');

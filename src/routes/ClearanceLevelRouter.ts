@@ -1,6 +1,6 @@
 import { Router } from "express";
 import ClearanceLevelController from "../controllers/ClearanceLevelController";
-import { verifyToken } from "./middlewares/Authentication";
+import { verifyToken } from "../middlewares/Authentication";
 
 const clearanceLevelRouter = Router();
 const controller = new ClearanceLevelController();
