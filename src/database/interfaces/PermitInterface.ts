@@ -2,7 +2,8 @@ import { PermissionEnum } from "../models/enums/PermissionEnum";
 
 export default interface PermitInterface {
   permitId?: string; 
-  permitName: PermissionEnum;
+  permitName: string;
+  permitList: PermissionEnum[];
 
   createdAt: Date;
   createdBy: string;
