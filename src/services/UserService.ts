@@ -10,6 +10,9 @@ import ExternalUserModel from "../database/models/ExternalUserModel";
 import { enrichUserData } from "../services/integrations/UserAggregator";
 import bcrypt from "bcrypt";
 import db from "../database/models/index"
+import UserAppRoleModel from "../database/models/UserAppRoleModel";
+import AppRoleModel from "../database/models/AppRoleModel";
+import ModuleModel from "../database/models/ModuleModel";
 
 class UserService {
   private model: ModelStatic<UserModel> = UserModel;
@@ -89,7 +92,7 @@ class UserService {
 
       await transaction.commit();
       const result = await this.model.findByPk(userId, {
-        attributes: { exclude: ['password']}
+        attributes: { exclude: ['password'] }
       });
       return Response.ok("Usuário atualizado com sucesso!", result);
 
@@ -128,6 +131,15 @@ class UserService {
         include: [
           { model: EmployeeUserModel, as: 'employeeLink' },
           { model: ExternalUserModel, as: 'externalLink' },
+          {
+            model: UserAppRoleModel,
+            as: 'userAppRoles',
+            include: [
+              { model: AppRoleModel, as: 'role' },
+              { model: ModuleModel, as: 'module' },
+            ]
+          },
+
         ],
       });
 
@@ -152,6 +164,15 @@ class UserService {
         include: [
           { model: EmployeeUserModel, as: 'employeeLink' },
           { model: ExternalUserModel, as: 'externalLink' },
+          {
+            model: UserAppRoleModel,
+            as: 'userAppRoles',
+            include: [
+              { model: AppRoleModel, as: 'role' },
+              { model: ModuleModel, as: 'module' },
+            ]
+          },
+
         ],
       });
 
