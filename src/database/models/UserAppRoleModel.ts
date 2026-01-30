@@ -103,7 +103,7 @@ UserAppRoleModel.belongsTo(AppRoleModel, {
 });
 AppRoleModel.hasMany(UserAppRoleModel, {
   foreignKey: 'fkAppRoleId',
-  as: 'userAppRoles',
+  as: 'appRole',
 });
 
 UserAppRoleModel.belongsTo(ModuleModel, {
@@ -112,7 +112,7 @@ UserAppRoleModel.belongsTo(ModuleModel, {
 });
 ModuleModel.hasMany(UserAppRoleModel, {
   foreignKey: 'fkModuleId',
-  as: 'userAppRoles',
+  as: 'appModule',
 })
 
 export default UserAppRoleModel;
