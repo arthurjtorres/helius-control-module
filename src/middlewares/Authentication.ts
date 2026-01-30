@@ -1,18 +1,24 @@
-import  jwt, { SignOptions }  from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 import 'dotenv/config';
 import { NextFunction, Request, Response } from "express";
 import Resp from "../utils/Response";
 
-const secret = process.env.JWT_SECRET as string
+const secret = process.env.JWT_SECRET as string;
+
+interface MenuPermission {
+  menu: string;
+  permissions: string[];
+}
 
 interface JwtPayload {
   userId: string;
-
+  userName: string;
   usertag: string;
   email: string;
   userType: string;
   clearance: string;
-  
+  moduleName: string;
+  allowedMenus: MenuPermission[];
 }
 
 const sign = (payload: JwtPayload) => {
@@ -26,7 +32,7 @@ const sign = (payload: JwtPayload) => {
 const verifyToken = (req: Request, res: Response, next: NextFunction) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    if(!token) {
+    if (!token) {
       return Resp.unauthorized('Token não fornecido');
     }
     const decoded = jwt.verify(token, secret) as JwtPayload;
@@ -37,4 +43,4 @@ const verifyToken = (req: Request, res: Response, next: NextFunction) => {
   }
 }
 
-export { sign, verifyToken};
+export { sign, verifyToken };
