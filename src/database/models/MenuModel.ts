@@ -72,10 +72,12 @@ MenuModel.init({
 
 MenuModel.belongsTo(ModuleModel, {
   foreignKey: 'fkModuleId',
+   as: 'menuModule'
 });
 
 ModuleModel.hasMany(MenuModel, {
   foreignKey: 'fkModuleId',
+   as: 'moduleMenu',
 })
 
 export default MenuModel;
