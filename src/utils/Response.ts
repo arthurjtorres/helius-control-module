@@ -32,8 +32,7 @@ class Response {
     return { status: 401, message };
   }
 
-  static forbidden(customMessage: string): ErrorResponse {
-    const message: string = "Acesso negado: " + customMessage;
+  static forbidden(message: string): ErrorResponse {
     return { status: 403, message }
   }
 
@@ -43,6 +42,10 @@ class Response {
 
   static conflict(message: string): ErrorResponse {
     return { status: 409, message };
+  }
+
+  static unprocessableEntity(message: string): ErrorResponse {
+    return { status: 422, message };
   }
 
   static internalError(message: string = "Erro interno do servidor"): ErrorResponse {

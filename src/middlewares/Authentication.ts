@@ -1,7 +1,7 @@
 import jwt, { SignOptions } from "jsonwebtoken";
 import 'dotenv/config';
-import { NextFunction, Request, Response } from "express";
-import Resp from "../utils/Response";
+import { NextFunction, Request, Response as ExpressResponse } from "express";
+import Response from "../utils/Response";
 
 const secret = process.env.JWT_SECRET as string;
 
@@ -35,17 +35,17 @@ const sign = (payload: JwtPayload) => {
   return jwt.sign(payload, secret, jwtConfig);
 }
 
-const verifyToken = (req: Request, res: Response, next: NextFunction) => {
+const verifyToken = (req: Request, res: ExpressResponse, next: NextFunction) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
-      return Resp.unauthorized('Token não fornecido');
+      return Response.unauthorized('Token não fornecido');
     }
     const decoded = jwt.verify(token, secret) as JwtPayload;
     res.locals.user = decoded
     next();
   } catch (error) {
-    return Resp.unauthorized('Token inválido');
+    return Response.unauthorized('Token inválido');
   }
 }
 
