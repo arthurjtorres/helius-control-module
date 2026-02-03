@@ -10,10 +10,18 @@ import ExternalUserModel from '../database/models/ExternalUserModel';
 import { enrichUserData } from './integrations/UserAggregator';
 import AppRoleModel from '../database/models/AppRoleModel';
 import ModuleModel from '../database/models/ModuleModel';
+import AppRolePermitModel from '../database/models/AppRolePermitModel';
+import MenuModel from '../database/models/MenuModel';
 
 interface MenuPermission {
   menu: string;
-  permissions: string [];
+  permissions: string[];
+}
+
+interface UserWithAssociations extends UserModel {
+  userAppRoles: UserAppRoleModel[]; // Substitua 'any' pelo seu Model UserAppRole se possível
+  employeeLink?: any;
+  externalLink?: any;
 }
 
 class AuthService {
@@ -21,7 +29,6 @@ class AuthService {
   private modelUserRole: ModelStatic<UserAppRoleModel> = UserAppRoleModel;
 
   async login(login: string, password: string) {
-
     try {
       // busca o usuário por email ou username
       const user = await this.modelUser.findOne({
@@ -34,13 +41,24 @@ class AuthService {
             model: UserAppRoleModel,
             as: 'userAppRoles',
             include: [
-              { model: AppRoleModel, as: 'role' },
               { model: ModuleModel, as: 'module' },
+              {
+                model: AppRoleModel,
+                as: 'role',
+                include: [{
+                  model: AppRolePermitModel,
+                  as: 'rolePermits',
+                  include: [{
+                    model: MenuModel,
+                    as: 'menu'
+                  }]
+                }]
+              }
             ]
           },
 
         ],
-      });
+      }) as UserWithAssociations | null;
 
       if (!user) {
         return Response.unauthorized("Usuário ou senha inválidos.");
@@ -56,86 +74,89 @@ class AuthService {
         return Response.unauthorized("Esta conta está desativada. Entre em contato com o suporte.");
       }
 
-      // fazer a requisição direto ao metodo get com id do userService e pegar os dados completos
-      // Nome da pessoa, Modulos, menus, permissões, etc...
-      
       const enrichedUser = await enrichUserData(user.toJSON());
 
       // Lógica para extrair o Nome Completo baseado no retorno da integração
       let fullName = user.userName; // Fallback
-      
+
       // Verifica se é Colaborador e acessa 'PersonModel' 
       if (enrichedUser.employee && enrichedUser.employee.PersonModel) {
         fullName = enrichedUser.employee.PersonModel.fullName;
-      } 
+      }
       // Verifica se é Externo
       else if (enrichedUser.person && enrichedUser.person.fullName) {
         fullName = enrichedUser.person.fullName;
       }
 
       //Busca de permissões
-      const securityContext = await this.getUserContext(user.userId);
+      const accessData = this.mapUserAccess(user.userAppRoles);
 
-      
       const payload = {
         userId: user.userId,
-        userName: fullName, // Agora preenchido via API Externa
+        userName: fullName,
         usertag: user.userName,
         email: user.email,
         userType: user.userType,
         clearance: user.fkClearanceId,
-        moduleName: securityContext.moduleName,
-        allowedMenus: securityContext.allowedMenus,
+
+        modules: accessData.modules,
+        roles: accessData.roles,
+        allowedMenus: accessData.permissions
       };
 
-      
+
       const token = sign(payload);
       return Response.ok("Autenticado com sucesso!", { token });
 
     } catch (error: any) {
-      // Padronizando erro conforme seu arquivo Response
-      return Response.internalError("Erro ao processar autenticação.");
+      return Response.internalError("Erro ao processar autenticação: " + error.message);
     }
   }
 
-  /**
-   * Método Privado para buscar permissões complexas no banco.
-   * Simula a busca na tabela App-Role-Permit e Module.
-   */
-  private async getUserContext(userId: string): Promise<{ moduleName: string, allowedMenus: MenuPermission[] }> {
-    try {
-      // Exemplo de Query com Sequelize. 
-      // Como não tenho seus models de Permissão/Menu, vou simular a lógica:
-      
-      // 1. Buscar as Roles do usuário
-      const userRoles = await this.modelUserRole.findAll({
-        where: { fkUserId: userId },
-        // include: [{ model: AppRoleModel, include: [ModuleModel] }] // Exemplo de Join
+
+  private mapUserAccess(userAppRoles: any[]) {
+    if (!userAppRoles || userAppRoles.length === 0) {
+      return { modules: [], roles: [], permissions: [] };
+    }
+
+    const modules: string[] = [];
+    const roles: any[] = [];
+    const permissionsMap = new Map<string, Set<string>>();
+
+    userAppRoles.forEach(appRole => {
+      const modName = appRole.module?.moduleName;
+      if (modName && !modules.includes(modName)) {
+        modules.push(modName);
+      }
+
+      roles.push({
+        module: modName,
+        role: appRole.role?.appRoleName
       });
 
-      // MOCK DE DADOS (Substitua pela sua query real do Sequelize acima)
-      // Aqui você percorreria userRoles -> AppRole -> Permissions -> Menus
-      
-      // Lógica fictícia: Se o usuário tem role com ID X, ele é do Jurídico
-      // Na prática, você pegaria isso do 'include: [ModuleModel]'
-      
-      const moduleName = "JURIDICO"; // Valor vindo do banco
+      if (appRole.role && appRole.role.permits) {
+        appRole.role.permits.forEach((permit: any) => {
+          const menuName = permit.menu?.menuName; 
+          const action = permit.actionName;
 
-      // Mapear as permissões vindas do banco para o formato do Token
-      const allowedMenus: MenuPermission[] = [
-        { menu: 'NOTIFICAÇÕES', permissions: ['READ', 'CREATE'] },
-        { menu: 'PROCESSOS', permissions: ['READ'] }
-      ];
+          if (menuName && action) {
+            if (!permissionsMap.has(menuName)) {
+              permissionsMap.set(menuName, new Set());
+            }
+            permissionsMap.get(menuName)?.add(action);
+          }
+        });
+      }
+    });
 
-      return { moduleName, allowedMenus };
+    const permissionsArray = Array.from(permissionsMap.entries()).map(([menu, actionsSet]) => ({
+      menu: menu,
+      permissions: Array.from(actionsSet)
+    }));
 
-    } catch (error) {
-      console.error("Erro ao buscar contexto de segurança", error);
-      // Retorna permissões vazias em caso de erro para não quebrar o login,
-      // mas o usuário não conseguirá acessar nada.
-      return { moduleName: '', allowedMenus: [] };
-    }
-  }
+    return { modules, roles, permissions: permissionsArray };
+
+  }  
 }
 
 export default AuthService;

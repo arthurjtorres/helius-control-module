@@ -5,19 +5,25 @@ import Resp from "../utils/Response";
 
 const secret = process.env.JWT_SECRET as string;
 
-interface MenuPermission {
+export interface MenuPermission {
   menu: string;
   permissions: string[];
 }
 
-interface JwtPayload {
+export interface UserModuleRole {
+  module: string;
+  role: string;
+}
+
+export interface JwtPayload {
   userId: string;
   userName: string;
   usertag: string;
   email: string;
   userType: string;
   clearance: string;
-  moduleName: string;
+  modules: string[]; 
+  roles: UserModuleRole[];
   allowedMenus: MenuPermission[];
 }
 

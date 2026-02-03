@@ -108,7 +108,7 @@ MenuModel.hasMany(AppRolePermitModel, {
 
 AppRolePermitModel.belongsTo(PermitModel, {
   foreignKey: "fkPermitId",
-  as: "Permit"
+  as: "permit"
 });
 PermitModel.hasMany(AppRolePermitModel, {
   foreignKey: "fkPermitId",
