@@ -80,8 +80,8 @@ class AuthService {
       let fullName = user.userName; // Fallback
 
       // Verifica se é Colaborador e acessa 'PersonModel' 
-      if (enrichedUser.employee && enrichedUser.employee.PersonModel) {
-        fullName = enrichedUser.employee.PersonModel.fullName;
+      if (enrichedUser.employee && enrichedUser.employee.Person) {
+        fullName = enrichedUser.employee.Person?.fullName;
       }
       // Verifica se é Externo
       else if (enrichedUser.person && enrichedUser.person.fullName) {
