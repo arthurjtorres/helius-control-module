@@ -1,10 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import { UserTypeEnum } from "./enums/UserTypeEnum";
-import db from ".";
+import db from "./database";
 import sequelize from "sequelize";
-import ClearanceLevelModel from "./ClearanceLevelModel";
-import EmployeeUserModel from "./EmployeeUserModel";
-import ExternalUserModel from "./ExternalUserModel";
 
 class UserModel extends Model {
   declare userId: string;
@@ -13,11 +10,6 @@ class UserModel extends Model {
   declare password: string;
   declare userType: UserTypeEnum;
   declare fkClearanceId: string;
-
-  // Relacionamentos opcionais
-  declare employeeLink?: EmployeeUserModel;
-  declare externalLink?: ExternalUserModel;
-
   declare createdAt: Date;
   declare createdBy: string;
   declare updatedAt: Date;
@@ -93,14 +85,6 @@ UserModel.init({
   schema: 'access_control',
   timestamps: false,
   underscored: true
-});
-
-UserModel.belongsTo(ClearanceLevelModel, {
-  foreignKey: 'fkClearanceId',
-});
-
-ClearanceLevelModel.hasMany(UserModel, {
-  foreignKey: 'fkClearanceId'
 });
 
 export default UserModel;

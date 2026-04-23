@@ -1,8 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-import db from ".";
-import UserModel from "./UserModel";
-import AppRoleModel from "./AppRoleModel";
-import ModuleModel from "./ModuleModel";
+import db from "./database";
 import sequelize from "sequelize";
 
 class UserAppRoleModel extends Model {
@@ -87,32 +84,5 @@ UserAppRoleModel.init({
   timestamps: false,
   underscored: true
 });
-
-UserAppRoleModel.belongsTo(UserModel, {
-  foreignKey: 'fkUserId',
-  as: 'user',
-});
-UserModel.hasMany(UserAppRoleModel, {
-  foreignKey: 'fkUserId',
-  as: 'userAppRoles',
-});
-
-UserAppRoleModel.belongsTo(AppRoleModel, {
-  foreignKey: 'fkAppRoleId',
-  as: 'role',
-});
-AppRoleModel.hasMany(UserAppRoleModel, {
-  foreignKey: 'fkAppRoleId',
-  as: 'appRole',
-});
-
-UserAppRoleModel.belongsTo(ModuleModel, {
-  foreignKey: 'fkModuleId',
-  as: 'module',
-});
-ModuleModel.hasMany(UserAppRoleModel, {
-  foreignKey: 'fkModuleId',
-  as: 'appModule',
-})
 
 export default UserAppRoleModel;
