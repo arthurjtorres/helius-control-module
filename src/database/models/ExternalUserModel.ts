@@ -1,6 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-import db from ".";
-import UserModel from "./UserModel";
+import db from "./database";
 import sequelize from "sequelize";
 
 class ExternalUserModel extends Model {
@@ -62,16 +61,5 @@ ExternalUserModel.init({
   timestamps: false,
   underscored: true
 });
-
-ExternalUserModel.belongsTo(UserModel, {
-  foreignKey: 'fkUserId',
-  as: 'user',
-});
-
-UserModel.hasOne(ExternalUserModel, {
-  foreignKey: 'fkUserId',
-  as: 'externalLink',
-});
-
 
 export default ExternalUserModel;

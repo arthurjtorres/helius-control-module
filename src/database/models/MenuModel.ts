@@ -1,7 +1,6 @@
 import { DataTypes, Model } from "sequelize";
-import db from ".";
+import db from "./database";
 import sequelize from "sequelize";
-import ModuleModel from "./ModuleModel";
 
 class MenuModel extends Model {
   declare menuId: string;
@@ -69,15 +68,5 @@ MenuModel.init({
   timestamps: false,
   underscored: true
 });
-
-MenuModel.belongsTo(ModuleModel, {
-  foreignKey: 'fkModuleId',
-   as: 'menuModule'
-});
-
-ModuleModel.hasMany(MenuModel, {
-  foreignKey: 'fkModuleId',
-   as: 'moduleMenu',
-})
 
 export default MenuModel;
