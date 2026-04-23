@@ -1,5 +1,5 @@
 import { DataTypes, Model } from 'sequelize';
-import db from '.';
+import db from "./database";
 import sequelize from 'sequelize';
 
 //Nível de acesso - Autoridade global (SUPERADMIN > ADMIN > SUPERVISOR > USER)

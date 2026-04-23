@@ -1,8 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-import db from ".";
-import PermitModel from "./PermitModel";
-import MenuModel from "./MenuModel";
-import AppRoleModel from "./AppRoleModel";
+import db from "./database";
 import sequelize from "sequelize";
 
 class AppRolePermitModel extends Model {
@@ -86,33 +83,6 @@ AppRolePermitModel.init({
   schema: 'access_control',
   timestamps: false,
   underscored: true
-});
-
-AppRolePermitModel.belongsTo(AppRoleModel, {
-  foreignKey: "fkAppRoleId",
-  as: "role"
-});
-AppRoleModel.hasMany(AppRolePermitModel, {
-  foreignKey: "fkAppRoleId",
-  as: "rolePermits"
-});
-
-AppRolePermitModel.belongsTo(MenuModel, {
-  foreignKey: "fkMenuId",
-  as: "menu"
-});
-MenuModel.hasMany(AppRolePermitModel, {
-  foreignKey: "fkMenuId",
-  as: "menuPermits"
-});
-
-AppRolePermitModel.belongsTo(PermitModel, {
-  foreignKey: "fkPermitId",
-  as: "permit"
-});
-PermitModel.hasMany(AppRolePermitModel, {
-  foreignKey: "fkPermitId",
-  as: "PermitAssignments"
 });
 
 export default AppRolePermitModel;
