@@ -1,6 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-import db from ".";
-import UserModel from "./UserModel";
+import db from "./database";
 import sequelize from "sequelize";
 
 
@@ -62,16 +61,6 @@ EmployeeUserModel.init({
   schema: 'access_control',
   timestamps: false,
   underscored: true
-});
-
-EmployeeUserModel.belongsTo(UserModel, {
-  foreignKey: 'fkUserId',
-  as: 'user',
-});
-
-UserModel.hasOne(EmployeeUserModel, {
-  foreignKey: 'fkUserId',
-  as: 'employeeLink',
 });
 
 export default EmployeeUserModel;
