@@ -20,8 +20,8 @@ interface MenuPermission {
 
 interface UserWithAssociations extends UserModel {
   userAppRoles: UserAppRoleModel[]; // Substitua 'any' pelo seu Model UserAppRole se possível
-  employeeLink?: any;
-  externalLink?: any;
+  EmployeeUser?: any;
+  ExternalUser?: any;
 }
 
 class AuthService {
@@ -35,8 +35,8 @@ class AuthService {
         where: {
           [Op.or]: [{ userName: login }, { email: login }]
         }, include: [
-          { model: EmployeeUserModel, as: 'employeeLink' },
-          { model: ExternalUserModel, as: 'externalLink' },
+          { model: EmployeeUserModel, as: 'EmployeeUser' },
+          { model: ExternalUserModel, as: 'ExternalUser' },
           {
             model: UserAppRoleModel,
             as: 'userAppRoles',
