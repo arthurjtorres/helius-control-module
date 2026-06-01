@@ -39,18 +39,18 @@ class AuthService {
           { model: ExternalUserModel, as: 'ExternalUser' },
           {
             model: UserAppRoleModel,
-            as: 'userAppRoles',
+            as: 'UserAppRole',
             include: [
-              { model: ModuleModel, as: 'module' },
+              { model: ModuleModel, as: 'Module' },
               {
                 model: AppRoleModel,
-                as: 'role',
+                as: 'AppRole',
                 include: [{
                   model: AppRolePermitModel,
-                  as: 'rolePermits',
+                  as: 'AppRolePermit',
                   include: [{
                     model: MenuModel,
-                    as: 'menu'
+                    as: 'Menu'
                   }]
                 }]
               }
