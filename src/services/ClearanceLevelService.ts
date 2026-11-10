@@ -1,5 +1,6 @@
 import { ModelStatic, Op } from "sequelize";
 import ClearanceLevelModel from "../database/models/ClearanceLevelModel";
+import UserModel from "../database/models/UserModel";
 import ClearanceLevelInterface from "../database/interfaces/ClearanceLevelInterface";
 import Response from "../utils/Response";
 import CreateValidationSchema from "./validations/CreateValidationSchema";
@@ -26,7 +27,7 @@ class ClearanceLevelService {
     if (error) return Response.badRequest(error.message);
 
     const [updated] = await this.model.update(data, {
-      where: { clearanceId: id },
+      where: { clearanceId: id, activated: true },
     });
 
     if (!updated) return Response.notFound("Nível de acesso não encontrado!");
@@ -35,26 +36,56 @@ class ClearanceLevelService {
     return Response.ok("Nível de acesso atualizado com sucesso!", result);
   }
 
-  async deleteClearanceLevel(id: string) {
-    const deleted = await this.model.destroy({
-      where: { clearanceId: id },
-    });
+  /**
+   * Desativa o registro (exclusão lógica): `activated = false`.
+   * @param id Identificador do registro.
+   * @param updatedBy Usuário autenticado que executa a operação.
+   */
+  async deleteClearanceLevel(id: string, updatedBy: string) {
+    if (!id) return Response.badRequest("ID não informado");
 
-    if (!deleted) return Response.notFound("Nível de acesso não encontrado!");
-    return Response.ok("Nível de acesso removido com sucesso!");
+    const activeUsers = await UserModel.count({ where: { fkClearanceId: id, activated: true } });
+    if (activeUsers > 0) {
+      return Response.conflict("Não é possível desativar: há usuários ativos com este nível de acesso.");
+    }
+
+    const [updated] = await this.model.update(
+      { activated: false, updatedBy, updatedAt: new Date() },
+      { where: { clearanceId: id, activated: true } }
+    );
+
+    if (!updated) return Response.notFound("Nível de acesso não encontrado!");
+    return Response.ok("Nível de acesso desativado com sucesso!");
+  }
+
+  /**
+   * Reativa um registro desativado (`activated = true`).
+   * @param id Identificador do registro.
+   * @param updatedBy Usuário autenticado que executa a operação.
+   */
+  async reactivateClearanceLevel(id: string, updatedBy: string) {
+    if (!id) return Response.badRequest("ID não informado");
+
+    const [updated] = await this.model.update(
+      { activated: true, updatedBy, updatedAt: new Date() },
+      { where: { clearanceId: id, activated: false } }
+    );
+
+    if (!updated) return Response.notFound("Nível de acesso não encontrado ou já ativo!");
+    return Response.ok("Nível de acesso reativado com sucesso!");
   }
 
   async getClearanceLevel(id: string) {
     if (!id) return Response.badRequest("ID não informado.");
 
-    const result = await this.model.findByPk(id);
+    const result = await this.model.findOne({ where: { clearanceId: id, activated: true } });
     if (!result) return Response.notFound("Nível de acesso não encontrado!");
 
     return Response.ok("Nível de acesso encontrado!", result);
   }
 
   async findClearanceLevels(query: Partial<Pick<ClearanceLevelInterface, 'clearanceName'>>) {
-    const where: any = {};
+    const where: any = { activated: true };
 
     if (query.clearanceName) {
       where.clearanceName = { [Op.iLike]: `%${query.clearanceName}%` };

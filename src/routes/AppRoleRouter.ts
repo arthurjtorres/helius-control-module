@@ -17,6 +17,9 @@ appRoleRouter.put("/:id", controller.updateAppRole.bind(controller));
 // DELETE - Remover função por ID
 appRoleRouter.delete("/:id", controller.deleteAppRole.bind(controller));
 
+// PATCH - Reativação (activated = true)
+appRoleRouter.patch("/:id/reactivate", controller.reactivateAppRole.bind(controller));
+
 // GET - Buscar função por ID
 appRoleRouter.get("/:id", controller.getAppRole.bind(controller));
 
