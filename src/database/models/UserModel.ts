@@ -84,7 +84,10 @@ UserModel.init({
   tableName: 'user',
   schema: 'access_control',
   timestamps: false,
-  underscored: true
+  underscored: true,
+  // O hash da senha nunca sai nas consultas; use scope('withPassword') só no login.
+  defaultScope: { attributes: { exclude: ['password'] } },
+  scopes: { withPassword: { attributes: { include: ['password'] } } },
 });
 
 export default UserModel;

@@ -31,7 +31,7 @@ class AuthService {
   async login(login: string, password: string) {
     try {
       // busca o usuário por email ou username
-      const user = await this.modelUser.findOne({
+      const user = await this.modelUser.scope('withPassword').findOne({
         where: {
           [Op.or]: [{ userName: login }, { email: login }]
         }, include: [
@@ -108,8 +108,10 @@ class AuthService {
       const token = sign(payload);
       return Response.ok("Autenticado com sucesso!", { token });
 
-    } catch (error: any) {
-      return Response.internalError("Erro ao processar autenticação: " + error.message);
+    } catch (error: unknown) {
+      // Detalhe só no log do servidor (sem senha nem token); o cliente recebe mensagem genérica
+      console.error("Erro no login:", error instanceof Error ? error.message : error);
+      return Response.internalError("Erro ao processar autenticação.");
     }
   }
 

@@ -3,6 +3,9 @@ import AppRolePermitController from "../controllers/AppRolePermitController";
 import { verifyToken } from "../middlewares/Authentication";
 
 const appRolePermitRouter = Router();
+
+// Todas as rotas deste router exigem token JWT válido
+appRolePermitRouter.use(verifyToken);
 const controller = new AppRolePermitController();
 
 // POST - Criar associação de papel e permissão
