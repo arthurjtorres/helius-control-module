@@ -28,11 +28,23 @@ class AppRoleController {
   async deleteAppRole(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const result = await this.service.deleteAppRole(id);
+      const result = await this.service.deleteAppRole(id, res.locals.user.userId);
       return res.status(result.status).json(result);
     } catch (error) {
       console.error("Erro em deleteAppRole:", error);
       return res.status(500).json("Erro interno ao deletar a função.");
+    }
+  }
+
+  /** PATCH /:id/reactivate — reativa o registro (`activated = true`). */
+  async reactivateAppRole(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const result = await this.service.reactivateAppRole(id, res.locals.user.userId);
+      return res.status(result.status).json(result);
+    } catch (error) {
+      console.error("Erro em reactivateAppRole:", error);
+      return res.status(500).json("Erro interno ao reativar registro.");
     }
   }
 

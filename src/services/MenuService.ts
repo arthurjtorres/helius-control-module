@@ -26,7 +26,7 @@ class MenuService {
     if (error) return Response.badRequest(error.message);
 
     const [updated] = await this.model.update(data, {
-      where: { menuId: id }
+      where: { menuId: id, activated: true }
     });
 
     if (!updated) return Response.notFound("Menu não encontrado!");
@@ -38,17 +38,45 @@ class MenuService {
     return Response.ok("Menu atualizado com sucesso!", result);
   }
 
-  async deleteMenu(id: string) {
-    const deleted = await this.model.destroy({ where: { menuId: id } });
+  /**
+   * Desativa o registro (exclusão lógica): `activated = false`.
+   * @param id Identificador do registro.
+   * @param updatedBy Usuário autenticado que executa a operação.
+   */
+  async deleteMenu(id: string, updatedBy: string) {
+    if (!id) return Response.badRequest("ID não informado");
 
-    if (!deleted) return Response.notFound("Menu não encontrado!");
-    return Response.ok("Menu deletado com sucesso!");
+    const [updated] = await this.model.update(
+      { activated: false, updatedBy, updatedAt: new Date() },
+      { where: { menuId: id, activated: true } }
+    );
+
+    if (!updated) return Response.notFound("Menu não encontrado!");
+    return Response.ok("Menu desativado com sucesso!");
+  }
+
+  /**
+   * Reativa um registro desativado (`activated = true`).
+   * @param id Identificador do registro.
+   * @param updatedBy Usuário autenticado que executa a operação.
+   */
+  async reactivateMenu(id: string, updatedBy: string) {
+    if (!id) return Response.badRequest("ID não informado");
+
+    const [updated] = await this.model.update(
+      { activated: true, updatedBy, updatedAt: new Date() },
+      { where: { menuId: id, activated: false } }
+    );
+
+    if (!updated) return Response.notFound("Menu não encontrado ou já ativo!");
+    return Response.ok("Menu reativado com sucesso!");
   }
 
   async getMenu(id: string) {
     if (!id) return Response.badRequest("ID do menu não informado.");
 
-    const result = await this.model.findByPk(id, {
+    const result = await this.model.findOne({
+      where: { menuId: id, activated: true },
       include: [{ model: ModuleModel }]
     });
 
@@ -57,7 +85,7 @@ class MenuService {
   }
 
   async findMenus(query: { menuName?: string; fkModuleId?: string }) {
-    const where: any = {};
+    const where: any = { activated: true };
 
     if (query.menuName) {
       where.menuName = { [Op.iLike]: `%${query.menuName}%` };

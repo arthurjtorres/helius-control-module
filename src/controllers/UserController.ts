@@ -28,11 +28,23 @@ class UserController {
   async deleteUser(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const result = await this.service.deleteUser(id);
+      const result = await this.service.deleteUser(id, res.locals.user.userId);
       return res.status(result.status).json(result);
     } catch (error) {
       console.error("Erro ao deletar usuário:", error);
       return res.status(500).json("Erro interno ao deletar usuário");
+    }
+  }
+
+  /** PATCH /:id/reactivate — reativa o registro (`activated = true`). */
+  async reactivateUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const result = await this.service.reactivateUser(id, res.locals.user.userId);
+      return res.status(result.status).json(result);
+    } catch (error) {
+      console.error("Erro em reactivateUser:", error);
+      return res.status(500).json("Erro interno ao reativar registro.");
     }
   }
 

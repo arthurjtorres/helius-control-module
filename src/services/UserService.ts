@@ -13,6 +13,10 @@ import db from "../database/models/index"
 import UserAppRoleModel from "../database/models/UserAppRoleModel";
 import AppRoleModel from "../database/models/AppRoleModel";
 import ModuleModel from "../database/models/ModuleModel";
+import ClearanceLevelModel from "../database/models/ClearanceLevelModel";
+
+/** Nome do nível de acesso do usuário de sistema (bootstrap). */
+const SYSTEM_CLEARANCE = "SYSTEM_ADMIN";
 
 class UserService {
   private model: ModelStatic<UserModel> = UserModel;
@@ -83,7 +87,7 @@ class UserService {
     try {
       if (data.password) data.password = await bcrypt.hash(data.password, 10);
 
-      const [updated] = await this.model.update(data, { where: { userId }, transaction });
+      const [updated] = await this.model.update(data, { where: { userId, activated: true }, transaction });
 
       if (!updated) {
         await transaction.rollback();
@@ -103,22 +107,62 @@ class UserService {
     }
   }
 
-  async deleteUser(userId: string) {
+  /**
+   * Desativa o usuário (exclusão lógica): `activated = false`. Nunca remove fisicamente.
+   * O token já emitido continua válido até expirar (25 min); o login passa a ser recusado.
+   * @param userId Usuário a desativar.
+   * @param updatedBy Usuário autenticado que executa a operação.
+   * @returns 403 para o usuário de sistema (bootstrap) e para a própria conta; 404 se inexistente ou já inativo.
+   */
+  async deleteUser(userId: string, updatedBy: string) {
     if (!userId) return Response.badRequest("ID do usuário não informado.");
 
-    const transaction = await db.transaction();
     try {
-      const deleted = await this.model.destroy({ where: { userId }, transaction });
-      if (!deleted) {
-        await transaction.rollback();
-        return Response.notFound("Usuário não encontrado para exclusão!");
+      const target = await this.model.findOne({
+        where: { userId, activated: true },
+        include: [{ model: ClearanceLevelModel, as: 'ClearanceLevel' }],
+      }) as (UserModel & { ClearanceLevel?: ClearanceLevelModel | null }) | null;
+
+      if (!target) return Response.notFound("Usuário não encontrado para exclusão!");
+
+      if (target.userType === UserTypeEnum.SISTEMA || target.ClearanceLevel?.clearanceName === SYSTEM_CLEARANCE) {
+        return Response.forbidden("O usuário de sistema não pode ser desativado.");
+      }
+      if (target.userId === updatedBy) {
+        return Response.forbidden("Não é possível desativar a própria conta.");
       }
 
-      await transaction.commit();
-      return Response.ok("Usuário deletado com sucesso");
+      const [updated] = await this.model.update(
+        { activated: false, updatedBy, updatedAt: new Date() },
+        { where: { userId, activated: true } }
+      );
+      if (!updated) return Response.notFound("Usuário não encontrado para exclusão!");
+
+      return Response.ok("Usuário desativado com sucesso");
     } catch (error: any) {
-      await transaction.rollback();
+      console.error("Erro no deleteUser:", error);
       return Response.internalError("Falha na exclusão: " + error.message);
+    }
+  }
+
+  /**
+   * Reativa um usuário desativado (`activated = true`).
+   * @param userId Usuário a reativar.
+   * @param updatedBy Usuário autenticado que executa a operação.
+   */
+  async reactivateUser(userId: string, updatedBy: string) {
+    if (!userId) return Response.badRequest("ID do usuário não informado.");
+
+    try {
+      const [updated] = await this.model.update(
+        { activated: true, updatedBy, updatedAt: new Date() },
+        { where: { userId, activated: false } }
+      );
+      if (!updated) return Response.notFound("Usuário não encontrado ou já ativo!");
+      return Response.ok("Usuário reativado com sucesso");
+    } catch (error: any) {
+      console.error("Erro no reactivateUser:", error);
+      return Response.internalError(error.message);
     }
   }
 
@@ -127,16 +171,19 @@ class UserService {
     if (!userId) return Response.badRequest("ID do usuário não informado.");
 
     try {
-      const result = await this.model.findByPk(userId, {
+      const result = await this.model.findOne({
+        where: { userId, activated: true },
         include: [
           { model: EmployeeUserModel, as: 'EmployeeUser' },
           { model: ExternalUserModel, as: 'ExternalUser' },
           {
             model: UserAppRoleModel,
             as: 'UserAppRole',
+            where: { activated: true },
+            required: false,
             include: [
-              { model: AppRoleModel, as: 'AppRole' },
-              { model: ModuleModel, as: 'Module' },
+              { model: AppRoleModel, as: 'AppRole', where: { activated: true }, required: false },
+              { model: ModuleModel, as: 'Module', where: { activated: true }, required: false },
             ]
           },
 
@@ -154,7 +201,7 @@ class UserService {
 
   async findUsers(query: { userName?: string; email?: string; userType?: UserTypeEnum }) {
     try {
-      const where: any = {};
+      const where: any = { activated: true };
       if (query.userName) where.userName = { [Op.iLike]: `%${query.userName}%` };
       if (query.email) where.email = { [Op.iLike]: `%${query.email}%` };
       if (query.userType) where.userType = query.userType;
@@ -167,9 +214,11 @@ class UserService {
           {
             model: UserAppRoleModel,
             as: 'UserAppRole',
+            where: { activated: true },
+            required: false,
             include: [
-              { model: AppRoleModel, as: 'AppRole' },
-              { model: ModuleModel, as: 'Module' },
+              { model: AppRoleModel, as: 'AppRole', where: { activated: true }, required: false },
+              { model: ModuleModel, as: 'Module', where: { activated: true }, required: false },
             ]
           },
 

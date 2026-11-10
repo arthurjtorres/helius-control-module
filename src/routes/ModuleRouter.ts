@@ -17,6 +17,9 @@ moduleRouter.put("/:id", controller.updateModule.bind(controller));
 // DELETE - Exclusão de módulo por ID (via URL param)
 moduleRouter.delete("/:id", controller.deleteModule.bind(controller));
 
+// PATCH - Reativação (activated = true)
+moduleRouter.patch("/:id/reactivate", controller.reactivateModule.bind(controller));
+
 // GET - Buscar módulo por ID (via URL param)
 moduleRouter.get("/:id", controller.getModule.bind(controller));
 

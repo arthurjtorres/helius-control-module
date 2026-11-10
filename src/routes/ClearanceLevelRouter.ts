@@ -17,6 +17,9 @@ clearanceLevelRouter.put("/:id", controller.updateClearanceLevel.bind(controller
 // DELETE - Deletar nível de acesso
 clearanceLevelRouter.delete("/:id", controller.deleteClearanceLevel.bind(controller));
 
+// PATCH - Reativação (activated = true)
+clearanceLevelRouter.patch("/:id/reactivate", controller.reactivateClearanceLevel.bind(controller));
+
 // GET - Buscar nível de acesso por ID
 clearanceLevelRouter.get("/:id", controller.getClearanceLevel.bind(controller));
 
