@@ -3,16 +3,19 @@ import UserAppRoleController from "../controllers/UserAppRoleController";
 import { verifyToken } from "../middlewares/Authentication";
 
 const userAppRoleRouter = Router();
+
+// Todas as rotas deste router exigem token JWT válido
+userAppRoleRouter.use(verifyToken);
 const controller = new UserAppRoleController();
 
 // POST - Criar vínculo papel-usuário
-userAppRoleRouter.post("/", verifyToken, controller.createUserAppRole.bind(controller));
+userAppRoleRouter.post("/", controller.createUserAppRole.bind(controller));
 
 // PUT - Atualizar vínculo por ID
-userAppRoleRouter.put("/:id", verifyToken, controller.updateUserAppRole.bind(controller));
+userAppRoleRouter.put("/:id", controller.updateUserAppRole.bind(controller));
 
 // DELETE - Remover vínculo por ID
-userAppRoleRouter.delete("/:id", verifyToken, controller.deleteUserAppRole.bind(controller));
+userAppRoleRouter.delete("/:id", controller.deleteUserAppRole.bind(controller));
 
 // GET - Buscar vínculo por ID
 userAppRoleRouter.get("/:id", controller.getUserAppRole.bind(controller));
