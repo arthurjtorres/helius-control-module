@@ -45,7 +45,10 @@ export interface JwtPayload {
   usertag: string;
   email: string;
   userType: string;
+  /** Nome do nível de acesso (`clearance_level.clearance_name`). */
   clearance: string;
+  /** UUID do nível de acesso (`clearance_level.clearance_id`). */
+  clearanceId: string;
   modules: string[]; 
   roles: UserModuleRole[];
   allowedMenus: MenuPermission[];

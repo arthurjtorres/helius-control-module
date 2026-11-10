@@ -123,6 +123,30 @@ export const setupAssociations = () => {
     as: 'UserAppRole',
   });
 
+  UserModuleModel.belongsTo(UserModel, {
+    foreignKey: 'fkUserId',
+    targetKey: 'userId',
+    as: 'User',
+  });
+
+  UserModel.hasMany(UserModuleModel, {
+    foreignKey: 'fkUserId',
+    sourceKey: 'userId',
+    as: 'UserModule',
+  });
+
+  UserModuleModel.belongsTo(ModuleModel, {
+    foreignKey: 'fkModuleId',
+    targetKey: 'moduleId',
+    as: 'Module',
+  });
+
+  ModuleModel.hasMany(UserModuleModel, {
+    foreignKey: 'fkModuleId',
+    sourceKey: 'moduleId',
+    as: 'UserModule',
+  });
+
   UserModel.belongsTo(ClearanceLevelModel, {
     foreignKey: 'fkClearanceId',
     targetKey: 'clearanceId',
