@@ -3,16 +3,19 @@ import PermitController from "../controllers/PermitController";
 import { verifyToken } from "../middlewares/Authentication";
 
 const permitRouter = Router();
+
+// Todas as rotas deste router exigem token JWT válido
+permitRouter.use(verifyToken);
 const controller = new PermitController();
 
 // POST - Criar permissão
-permitRouter.post("/", verifyToken, controller.createPermit.bind(controller));
+permitRouter.post("/", controller.createPermit.bind(controller));
 
 // PUT - Atualizar permissão
-permitRouter.put("/:id", verifyToken, controller.updatePermit.bind(controller));
+permitRouter.put("/:id", controller.updatePermit.bind(controller));
 
 // DELETE - Remover permissão
-permitRouter.delete("/:id", verifyToken, controller.deletePermit.bind(controller));
+permitRouter.delete("/:id", controller.deletePermit.bind(controller));
 
 // GET - Buscar permissão por ID
 permitRouter.get("/:id", controller.getPermit.bind(controller));

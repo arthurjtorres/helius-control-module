@@ -3,16 +3,19 @@ import UserController from "../controllers/UserController";
 import { verifyToken } from "../middlewares/Authentication";
 
 const userRouter = Router();
+
+// Todas as rotas deste router exigem token JWT válido
+userRouter.use(verifyToken);
 const controller = new UserController();
 
 // POST - Criação de usuário
-userRouter.post("/", verifyToken, controller.createUser.bind(controller));
+userRouter.post("/", controller.createUser.bind(controller));
 
 // PUT - Atualização de usuário (ID na URL, dados no body)
-userRouter.put("/:id", verifyToken, controller.updateUser.bind(controller));
+userRouter.put("/:id", controller.updateUser.bind(controller));
 
 // DELETE - Exclusão de usuário por ID (via URL param)
-userRouter.delete("/:id", verifyToken, controller.deleteUser.bind(controller));
+userRouter.delete("/:id", controller.deleteUser.bind(controller));
 
 // GET - Buscar usuário por ID (via URL param)
 userRouter.get("/:id", controller.getUser.bind(controller));

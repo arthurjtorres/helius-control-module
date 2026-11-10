@@ -3,16 +3,19 @@ import ClearanceLevelController from "../controllers/ClearanceLevelController";
 import { verifyToken } from "../middlewares/Authentication";
 
 const clearanceLevelRouter = Router();
+
+// Todas as rotas deste router exigem token JWT válido
+clearanceLevelRouter.use(verifyToken);
 const controller = new ClearanceLevelController();
 
 // POST - Criar nível de acesso
-clearanceLevelRouter.post("/", verifyToken, controller.createClearanceLevel.bind(controller));
+clearanceLevelRouter.post("/", controller.createClearanceLevel.bind(controller));
 
 // PUT - Atualizar nível de acesso
-clearanceLevelRouter.put("/:id", verifyToken, controller.updateClearanceLevel.bind(controller));
+clearanceLevelRouter.put("/:id", controller.updateClearanceLevel.bind(controller));
 
 // DELETE - Deletar nível de acesso
-clearanceLevelRouter.delete("/:id", verifyToken, controller.deleteClearanceLevel.bind(controller));
+clearanceLevelRouter.delete("/:id", controller.deleteClearanceLevel.bind(controller));
 
 // GET - Buscar nível de acesso por ID
 clearanceLevelRouter.get("/:id", controller.getClearanceLevel.bind(controller));
