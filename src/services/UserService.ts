@@ -15,6 +15,9 @@ import AppRoleModel from "../database/models/AppRoleModel";
 import ModuleModel from "../database/models/ModuleModel";
 import ClearanceLevelModel from "../database/models/ClearanceLevelModel";
 
+/** UUID em qualquer versão (validação de filtros de query). */
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /** Nome do nível de acesso do usuário de sistema (bootstrap). */
 const SYSTEM_CLEARANCE = "SYSTEM_ADMIN";
 
@@ -199,7 +202,16 @@ class UserService {
     }
   }
 
-  async findUsers(query: { userName?: string; email?: string; userType?: UserTypeEnum }) {
+  /**
+   * Lista usuários ativos com filtros opcionais.
+   * `fkEmployeeId` retorna só usuários ativos vinculados ao funcionário (`employee_user`);
+   * usado pelo `registry` para bloquear a desativação de funcionário com usuário ativo.
+   */
+  async findUsers(query: { userName?: string; email?: string; userType?: UserTypeEnum; fkEmployeeId?: string }) {
+    if (query.fkEmployeeId && !UUID_REGEX.test(query.fkEmployeeId)) {
+      return Response.badRequest("fkEmployeeId deve ser um UUID válido.");
+    }
+
     try {
       const where: any = { activated: true };
       if (query.userName) where.userName = { [Op.iLike]: `%${query.userName}%` };
@@ -209,7 +221,9 @@ class UserService {
       const users = await this.model.findAll({
         where,
         include: [
-          { model: EmployeeUserModel, as: 'EmployeeUser' },
+          query.fkEmployeeId
+            ? { model: EmployeeUserModel, as: 'EmployeeUser', where: { fkEmployeeId: query.fkEmployeeId, activated: true }, required: true }
+            : { model: EmployeeUserModel, as: 'EmployeeUser' },
           { model: ExternalUserModel, as: 'ExternalUser' },
           {
             model: UserAppRoleModel,
