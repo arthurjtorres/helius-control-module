@@ -129,14 +129,14 @@ class UserService {
     try {
       const result = await this.model.findByPk(userId, {
         include: [
-          { model: EmployeeUserModel, as: 'employeeLink' },
-          { model: ExternalUserModel, as: 'externalLink' },
+          { model: EmployeeUserModel, as: 'EmployeeUser' },
+          { model: ExternalUserModel, as: 'ExternalUser' },
           {
             model: UserAppRoleModel,
-            as: 'userAppRoles',
+            as: 'UserAppRole',
             include: [
-              { model: AppRoleModel, as: 'role' },
-              { model: ModuleModel, as: 'module' },
+              { model: AppRoleModel, as: 'AppRole' },
+              { model: ModuleModel, as: 'Module' },
             ]
           },
 
@@ -162,14 +162,14 @@ class UserService {
       const users = await this.model.findAll({
         where,
         include: [
-          { model: EmployeeUserModel, as: 'employeeLink' },
-          { model: ExternalUserModel, as: 'externalLink' },
+          { model: EmployeeUserModel, as: 'EmployeeUser' },
+          { model: ExternalUserModel, as: 'ExternalUser' },
           {
             model: UserAppRoleModel,
-            as: 'userAppRoles',
+            as: 'UserAppRole',
             include: [
-              { model: AppRoleModel, as: 'role' },
-              { model: ModuleModel, as: 'module' },
+              { model: AppRoleModel, as: 'AppRole' },
+              { model: ModuleModel, as: 'Module' },
             ]
           },
 
