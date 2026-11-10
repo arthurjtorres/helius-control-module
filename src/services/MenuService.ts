@@ -32,7 +32,7 @@ class MenuService {
     if (!updated) return Response.notFound("Menu não encontrado!");
 
     const result = await this.model.findByPk(id, {
-      include: [{ model: ModuleModel }]
+      include: [{ model: ModuleModel, as: 'Module' }]
     });
 
     return Response.ok("Menu atualizado com sucesso!", result);
@@ -77,7 +77,7 @@ class MenuService {
 
     const result = await this.model.findOne({
       where: { menuId: id, activated: true },
-      include: [{ model: ModuleModel }]
+      include: [{ model: ModuleModel, as: 'Module' }]
     });
 
     if (!result) return Response.notFound("Menu não encontrado!");
@@ -97,7 +97,7 @@ class MenuService {
 
     const result = await this.model.findAll({
       where,
-      include: [{ model: ModuleModel }]
+      include: [{ model: ModuleModel, as: 'Module' }]
     });
 
     if (!result.length) {
