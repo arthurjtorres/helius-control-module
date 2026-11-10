@@ -3,8 +3,8 @@ import { getPersonById } from "./PersonService";
 
 export const enrichUserData = async (user: any) => {
   try {
-    const employeeId = user?.employeeLink?.fkEmployeeId;
-    const personId = user?.externalLink?.fkPersonId;
+    const employeeId = user?.EmployeeUser?.fkEmployeeId;
+    const personId = user?.ExternalUser?.fkPersonId;
 
     const [employeeData, personData] = await Promise.all([
       employeeId ? getEmployeeById(employeeId) : null,

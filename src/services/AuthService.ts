@@ -12,17 +12,106 @@ import AppRoleModel from '../database/models/AppRoleModel';
 import ModuleModel from '../database/models/ModuleModel';
 import AppRolePermitModel from '../database/models/AppRolePermitModel';
 import MenuModel from '../database/models/MenuModel';
+import PermitModel from '../database/models/PermitModel';
+import ClearanceLevelModel from '../database/models/ClearanceLevelModel';
+import UserModuleModel from '../database/models/UserModuleModel';
+import { MenuPermission, UserModuleRole } from '../middlewares/Authentication';
 
-interface MenuPermission {
-  menu: string;
-  permissions: string[];
+/** Vínculo role → menu → permissão, como carregado no login. */
+interface AppRolePermitWithRelations extends AppRolePermitModel {
+  Menu?: MenuModel | null;
+  Permit?: PermitModel | null;
+}
+
+interface AppRoleWithRelations extends AppRoleModel {
+  AppRolePermit?: AppRolePermitWithRelations[];
+}
+
+/** Vínculo usuário → role (num módulo), como carregado no login. */
+interface UserAppRoleWithRelations extends UserAppRoleModel {
+  Module?: ModuleModel | null;
+  AppRole?: AppRoleWithRelations | null;
+}
+
+/** Vínculo usuário → módulo (acesso ao módulo), como carregado no login. */
+interface UserModuleWithRelations extends UserModuleModel {
+  Module?: ModuleModel | null;
 }
 
 interface UserWithAssociations extends UserModel {
-  userAppRoles: UserAppRoleModel[]; // Substitua 'any' pelo seu Model UserAppRole se possível
-  EmployeeUser?: any;
-  ExternalUser?: any;
+  EmployeeUser?: EmployeeUserModel | null;
+  ExternalUser?: ExternalUserModel | null;
+  ClearanceLevel?: ClearanceLevelModel | null;
+  UserAppRole?: UserAppRoleWithRelations[];
+  UserModule?: UserModuleWithRelations[];
 }
+
+/** Acesso do usuário consolidado para o payload do JWT. */
+interface UserAccess {
+  modules: string[];
+  roles: UserModuleRole[];
+  permissions: MenuPermission[];
+}
+
+/**
+ * Consolida módulos, roles e permissões por menu a partir dos vínculos do usuário.
+ *
+ * - `modules`: vem de `user_module` (acesso ao módulo); ignora vínculo expirado.
+ * - `roles` e `permissions`: vêm de `user_app_role` → `app_role` → `app_role_permit`
+ *   (`Menu` + `Permit.permitList`); permissões do mesmo menu são unidas sem duplicar.
+ * - Registros com `activated = false` (vínculo, módulo, role, menu ou permit) e
+ *   relações ausentes são ignorados.
+ *
+ * @param userAppRoles Vínculos usuário-role carregados com `Module` e `AppRole`.
+ * @param userModules Vínculos usuário-módulo carregados com `Module`.
+ * @param now Instante de referência para validade do acesso (injetável em testes).
+ */
+export const mapUserAccess = (
+  userAppRoles: UserAppRoleWithRelations[] = [],
+  userModules: UserModuleWithRelations[] = [],
+  now: Date = new Date()
+): UserAccess => {
+  const modules = new Set<string>();
+  userModules.forEach(link => {
+    const mod = link.Module;
+    if (!link.activated || !mod?.activated || !mod.moduleName) return;
+    if (new Date(link.expiresAt) <= now) return;
+    modules.add(mod.moduleName);
+  });
+
+  const roles = new Map<string, UserModuleRole>();
+  const permissionsByMenu = new Map<string, Set<string>>();
+
+  userAppRoles.forEach(link => {
+    const mod = link.Module;
+    const role = link.AppRole;
+    if (!link.activated || !mod?.activated || !role?.activated) return;
+
+    roles.set(`${mod.moduleName}|${role.appRoleName}`, {
+      module: mod.moduleName,
+      role: role.appRoleName,
+    });
+
+    (role.AppRolePermit ?? []).forEach(rolePermit => {
+      const menu = rolePermit.Menu;
+      const permit = rolePermit.Permit;
+      if (!rolePermit.activated || !menu?.activated || !permit?.activated) return;
+
+      const actions = permissionsByMenu.get(menu.menuName) ?? new Set<string>();
+      (permit.permitList ?? []).forEach(action => actions.add(action));
+      permissionsByMenu.set(menu.menuName, actions);
+    });
+  });
+
+  return {
+    modules: Array.from(modules),
+    roles: Array.from(roles.values()),
+    permissions: Array.from(permissionsByMenu.entries()).map(([menu, actions]) => ({
+      menu,
+      permissions: Array.from(actions),
+    })),
+  };
+};
 
 class AuthService {
   private modelUser: ModelStatic<UserModel> = UserModel;
@@ -37,6 +126,8 @@ class AuthService {
         }, include: [
           { model: EmployeeUserModel, as: 'EmployeeUser' },
           { model: ExternalUserModel, as: 'ExternalUser' },
+          { model: ClearanceLevelModel, as: 'ClearanceLevel' },
+          { model: UserModuleModel, as: 'UserModule', include: [{ model: ModuleModel, as: 'Module' }] },
           {
             model: UserAppRoleModel,
             as: 'UserAppRole',
@@ -89,7 +180,7 @@ class AuthService {
       }
 
       //Busca de permissões
-      const accessData = this.mapUserAccess(user.userAppRoles);
+      const accessData = mapUserAccess(user.UserAppRole, user.UserModule);
 
       const payload = {
         userId: user.userId,
@@ -97,7 +188,8 @@ class AuthService {
         usertag: user.userName,
         email: user.email,
         userType: user.userType,
-        clearance: user.fkClearanceId,
+        clearance: user.ClearanceLevel?.clearanceName ?? '',
+        clearanceId: user.fkClearanceId,
 
         modules: accessData.modules,
         roles: accessData.roles,
@@ -114,51 +206,6 @@ class AuthService {
       return Response.internalError("Erro ao processar autenticação.");
     }
   }
-
-
-  private mapUserAccess(userAppRoles: any[]) {
-    if (!userAppRoles || userAppRoles.length === 0) {
-      return { modules: [], roles: [], permissions: [] };
-    }
-
-    const modules: string[] = [];
-    const roles: any[] = [];
-    const permissionsMap = new Map<string, Set<string>>();
-
-    userAppRoles.forEach(appRole => {
-      const modName = appRole.module?.moduleName;
-      if (modName && !modules.includes(modName)) {
-        modules.push(modName);
-      }
-
-      roles.push({
-        module: modName,
-        role: appRole.role?.appRoleName
-      });
-
-      if (appRole.role && appRole.role.permits) {
-        appRole.role.permits.forEach((permit: any) => {
-          const menuName = permit.menu?.menuName; 
-          const action = permit.actionName;
-
-          if (menuName && action) {
-            if (!permissionsMap.has(menuName)) {
-              permissionsMap.set(menuName, new Set());
-            }
-            permissionsMap.get(menuName)?.add(action);
-          }
-        });
-      }
-    });
-
-    const permissionsArray = Array.from(permissionsMap.entries()).map(([menu, actionsSet]) => ({
-      menu: menu,
-      permissions: Array.from(actionsSet)
-    }));
-
-    return { modules, roles, permissions: permissionsArray };
-
-  }  
 }
 
 export default AuthService;
