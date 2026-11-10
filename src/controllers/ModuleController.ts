@@ -28,11 +28,23 @@ class ModuleController {
   async deleteModule(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const result = await this.service.deleteModule(id);
+      const result = await this.service.deleteModule(id, res.locals.user.userId);
       return res.status(result.status).json(result);
     } catch (error) {
       console.error("Erro ao deletar módulo:", error);
       return res.status(500).json("Erro interno ao deletar módulo.");
+    }
+  }
+
+  /** PATCH /:id/reactivate — reativa o registro (`activated = true`). */
+  async reactivateModule(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const result = await this.service.reactivateModule(id, res.locals.user.userId);
+      return res.status(result.status).json(result);
+    } catch (error) {
+      console.error("Erro em reactivateModule:", error);
+      return res.status(500).json("Erro interno ao reativar registro.");
     }
   }
 

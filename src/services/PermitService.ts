@@ -25,7 +25,7 @@ class PermitService {
     if (error) return Response.badRequest(error.message);
 
     const [updated] = await this.model.update(data, {
-      where: { permitId: id }
+      where: { permitId: id, activated: true }
     });
 
     if (!updated) return Response.notFound("Permissão não encontrada!");
@@ -34,23 +34,50 @@ class PermitService {
     return Response.ok("Permissão atualizada com sucesso!", result);
   }
 
-  async deletePermit(id: string) {
-    const deleted = await this.model.destroy({ where: { permitId: id } });
+  /**
+   * Desativa o registro (exclusão lógica): `activated = false`.
+   * @param id Identificador do registro.
+   * @param updatedBy Usuário autenticado que executa a operação.
+   */
+  async deletePermit(id: string, updatedBy: string) {
+    if (!id) return Response.badRequest("ID não informado");
 
-    if (!deleted) return Response.notFound("Permissão não encontrada!");
-    return Response.ok("Permissão deletada com sucesso!");
+    const [updated] = await this.model.update(
+      { activated: false, updatedBy, updatedAt: new Date() },
+      { where: { permitId: id, activated: true } }
+    );
+
+    if (!updated) return Response.notFound("Permissão não encontrada!");
+    return Response.ok("Permissão desativada com sucesso!");
+  }
+
+  /**
+   * Reativa um registro desativado (`activated = true`).
+   * @param id Identificador do registro.
+   * @param updatedBy Usuário autenticado que executa a operação.
+   */
+  async reactivatePermit(id: string, updatedBy: string) {
+    if (!id) return Response.badRequest("ID não informado");
+
+    const [updated] = await this.model.update(
+      { activated: true, updatedBy, updatedAt: new Date() },
+      { where: { permitId: id, activated: false } }
+    );
+
+    if (!updated) return Response.notFound("Permissão não encontrada ou já ativo!");
+    return Response.ok("Permissão reativada com sucesso!");
   }
 
   async getPermit(id: string) {
     if (!id) return Response.badRequest("ID da permissão não informado.");
 
-    const result = await this.model.findByPk(id);
+    const result = await this.model.findOne({ where: { permitId: id, activated: true } });
     if (!result) return Response.notFound("Permissão não encontrada!");
     return Response.ok("Permissão encontrada!", result);
   }
 
   async findPermits(query: Partial<Pick<PermitInterface, 'permitName'>>) {
-    const where: any = {};
+    const where: any = { activated: true };
 
     if (query.permitName) {
       where.permitName = { [Op.iLike]: `%${query.permitName}%` };

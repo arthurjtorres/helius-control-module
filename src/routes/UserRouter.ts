@@ -17,6 +17,9 @@ userRouter.put("/:id", controller.updateUser.bind(controller));
 // DELETE - Exclusão de usuário por ID (via URL param)
 userRouter.delete("/:id", controller.deleteUser.bind(controller));
 
+// PATCH - Reativação (activated = true)
+userRouter.patch("/:id/reactivate", controller.reactivateUser.bind(controller));
+
 // GET - Buscar usuário por ID (via URL param)
 userRouter.get("/:id", controller.getUser.bind(controller));
 

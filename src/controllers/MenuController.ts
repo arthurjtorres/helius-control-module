@@ -28,11 +28,23 @@ class MenuController {
   async deleteMenu(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const result = await this.service.deleteMenu(id);
+      const result = await this.service.deleteMenu(id, res.locals.user.userId);
       return res.status(result.status).json(result);
     } catch (error) {
       console.error("Erro em deleteMenu:", error);
       return res.status(500).json("Erro interno ao deletar menu.");
+    }
+  }
+
+  /** PATCH /:id/reactivate — reativa o registro (`activated = true`). */
+  async reactivateMenu(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const result = await this.service.reactivateMenu(id, res.locals.user.userId);
+      return res.status(result.status).json(result);
+    } catch (error) {
+      console.error("Erro em reactivateMenu:", error);
+      return res.status(500).json("Erro interno ao reativar registro.");
     }
   }
 
