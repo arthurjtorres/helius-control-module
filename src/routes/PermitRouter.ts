@@ -17,6 +17,9 @@ permitRouter.put("/:id", controller.updatePermit.bind(controller));
 // DELETE - Remover permissão
 permitRouter.delete("/:id", controller.deletePermit.bind(controller));
 
+// PATCH - Reativação (activated = true)
+permitRouter.patch("/:id/reactivate", controller.reactivatePermit.bind(controller));
+
 // GET - Buscar permissão por ID
 permitRouter.get("/:id", controller.getPermit.bind(controller));
 

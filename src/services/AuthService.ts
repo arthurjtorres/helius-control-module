@@ -139,10 +139,10 @@ class AuthService {
                 include: [{
                   model: AppRolePermitModel,
                   as: 'AppRolePermit',
-                  include: [{
-                    model: MenuModel,
-                    as: 'Menu'
-                  }]
+                  include: [
+                    { model: MenuModel, as: 'Menu' },
+                    { model: PermitModel, as: 'Permit' }
+                  ]
                 }]
               }
             ]

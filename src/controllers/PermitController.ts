@@ -28,11 +28,23 @@ class PermitController {
   async deletePermit(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const result = await this.service.deletePermit(id);
+      const result = await this.service.deletePermit(id, res.locals.user.userId);
       return res.status(result.status).json(result);
     } catch (error) {
       console.error("Erro em deletePermit:", error);
       return res.status(500).json("Erro interno ao deletar permissão.");
+    }
+  }
+
+  /** PATCH /:id/reactivate — reativa o registro (`activated = true`). */
+  async reactivatePermit(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const result = await this.service.reactivatePermit(id, res.locals.user.userId);
+      return res.status(result.status).json(result);
+    } catch (error) {
+      console.error("Erro em reactivatePermit:", error);
+      return res.status(500).json("Erro interno ao reativar registro.");
     }
   }
 

@@ -1,5 +1,6 @@
 import { ModelStatic, Op } from "sequelize";
 import ModuleModel from "../database/models/ModuleModel";
+import MenuModel from "../database/models/MenuModel";
 import ModuleInterface from "../database/interfaces/ModuleInterface";
 import Response from "../utils/Response";
 import CreateValidationSchema from "./validations/CreateValidationSchema";
@@ -25,7 +26,7 @@ class ModuleService {
     if (error) return Response.badRequest(error.message);
 
     const [updated] = await this.model.update(data, {
-      where: { moduleId: id }
+      where: { moduleId: id, activated: true }
     });
 
     if (!updated) return Response.notFound("Módulo não encontrado!");
@@ -34,25 +35,55 @@ class ModuleService {
     return Response.ok("Módulo atualizado com sucesso!", result);
   }
 
-  async deleteModule(id: string) {
-    const deleted = await this.model.destroy({
-      where: { moduleId: id }
-    });
+  /**
+   * Desativa o registro (exclusão lógica): `activated = false`.
+   * @param id Identificador do registro.
+   * @param updatedBy Usuário autenticado que executa a operação.
+   */
+  async deleteModule(id: string, updatedBy: string) {
+    if (!id) return Response.badRequest("ID não informado");
 
-    if (!deleted) return Response.notFound("Módulo não encontrado!");
-    return Response.ok("Módulo deletado com sucesso!");
+    const activeMenus = await MenuModel.count({ where: { fkModuleId: id, activated: true } });
+    if (activeMenus > 0) {
+      return Response.conflict("Não é possível desativar: o módulo possui menus ativos.");
+    }
+
+    const [updated] = await this.model.update(
+      { activated: false, updatedBy, updatedAt: new Date() },
+      { where: { moduleId: id, activated: true } }
+    );
+
+    if (!updated) return Response.notFound("Módulo não encontrado!");
+    return Response.ok("Módulo desativado com sucesso!");
+  }
+
+  /**
+   * Reativa um registro desativado (`activated = true`).
+   * @param id Identificador do registro.
+   * @param updatedBy Usuário autenticado que executa a operação.
+   */
+  async reactivateModule(id: string, updatedBy: string) {
+    if (!id) return Response.badRequest("ID não informado");
+
+    const [updated] = await this.model.update(
+      { activated: true, updatedBy, updatedAt: new Date() },
+      { where: { moduleId: id, activated: false } }
+    );
+
+    if (!updated) return Response.notFound("Módulo não encontrado ou já ativo!");
+    return Response.ok("Módulo reativado com sucesso!");
   }
 
   async getModule(id: string) {
     if (!id) return Response.badRequest("ID do módulo não informado.");
 
-    const result = await this.model.findByPk(id);
+    const result = await this.model.findOne({ where: { moduleId: id, activated: true } });
     if (!result) return Response.notFound("Módulo não encontrado!");
     return Response.ok("Módulo encontrado!", result);
   }
 
   async findModules(query: { moduleName?: string }) {
-    const where: any = {};
+    const where: any = { activated: true };
 
     if (query.moduleName) {
       where.moduleName = { [Op.iLike]: `%${query.moduleName}%` };

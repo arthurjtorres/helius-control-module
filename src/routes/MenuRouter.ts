@@ -17,6 +17,9 @@ menuRouter.put("/:id", controller.updateMenu.bind(controller));
 // DELETE - Exclusão de menu por ID
 menuRouter.delete("/:id", controller.deleteMenu.bind(controller));
 
+// PATCH - Reativação (activated = true)
+menuRouter.patch("/:id/reactivate", controller.reactivateMenu.bind(controller));
+
 // GET - Buscar menu por ID
 menuRouter.get("/:id", controller.getMenu.bind(controller));
 
