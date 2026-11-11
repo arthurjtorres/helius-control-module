@@ -1,6 +1,8 @@
 import { Router } from "express";
 import UserAppRoleController from "../controllers/UserAppRoleController";
 import { verifyToken } from "../middlewares/Authentication";
+import { checkPermission } from "../middlewares/CheckPermission";
+import { PermissionEnum } from "../database/models/enums/PermissionEnum";
 
 const userAppRoleRouter = Router();
 
@@ -9,18 +11,18 @@ userAppRoleRouter.use(verifyToken);
 const controller = new UserAppRoleController();
 
 // POST - Criar vínculo papel-usuário
-userAppRoleRouter.post("/", controller.createUserAppRole.bind(controller));
+userAppRoleRouter.post("/", checkPermission("PERMISSOES", PermissionEnum.CREATE), controller.createUserAppRole.bind(controller));
 
 // PUT - Atualizar vínculo por ID
-userAppRoleRouter.put("/:id", controller.updateUserAppRole.bind(controller));
+userAppRoleRouter.put("/:id", checkPermission("PERMISSOES", PermissionEnum.UPDATE), controller.updateUserAppRole.bind(controller));
 
 // DELETE - Remover vínculo por ID
-userAppRoleRouter.delete("/:id", controller.deleteUserAppRole.bind(controller));
+userAppRoleRouter.delete("/:id", checkPermission("PERMISSOES", PermissionEnum.DELETE), controller.deleteUserAppRole.bind(controller));
 
 // GET - Buscar vínculo por ID
-userAppRoleRouter.get("/:id", controller.getUserAppRole.bind(controller));
+userAppRoleRouter.get("/:id", checkPermission("PERMISSOES", PermissionEnum.READ), controller.getUserAppRole.bind(controller));
 
 // GET - Buscar vínculos com filtros
-userAppRoleRouter.get("/", controller.findUserAppRoles.bind(controller));
+userAppRoleRouter.get("/", checkPermission("PERMISSOES", PermissionEnum.READ), controller.findUserAppRoles.bind(controller));
 
 export default userAppRoleRouter;

@@ -6,7 +6,7 @@ class UserAppRoleController {
 
   async createUserAppRole(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await this.service.createUserAppRole(req.body);
+      const result = await this.service.createUserAppRole({ ...req.body, createdBy: res.locals.user.userId }, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
       console.error("Erro em createUserAppRole:", error);
@@ -17,7 +17,7 @@ class UserAppRoleController {
   async updateUserAppRole(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const result = await this.service.updateUserAppRole(id, req.body);
+      const result = await this.service.updateUserAppRole(id, { ...req.body, updatedBy: res.locals.user.userId }, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
       console.error("Erro em updateUserAppRole:", error);
@@ -28,7 +28,7 @@ class UserAppRoleController {
   async deleteUserAppRole(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const result = await this.service.deleteUserAppRole(id);
+      const result = await this.service.deleteUserAppRole(id, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
       console.error("Erro em deleteUserAppRole:", error);
