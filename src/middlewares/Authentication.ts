@@ -40,6 +40,8 @@ export interface UserModuleRole {
 }
 
 export interface JwtPayload {
+  /** Presente (`'service'`) só em tokens de serviço entre módulos (ADR-011). */
+  tokenType?: 'service';
   userId: string;
   userName: string;
   usertag: string;
@@ -62,6 +64,18 @@ const sign = (payload: JwtPayload) => {
   return jwt.sign(payload, getSecret(), jwtConfig);
 }
 
+/** Métodos liberados ao token de serviço. */
+const SERVICE_SAFE_METHODS = ['GET', 'HEAD'];
+
+/**
+ * Marca a rota como consulta que aceita token de serviço mesmo em `POST`
+ * (ex.: consulta em lote por ids). Deve vir **antes** de `verifyToken`.
+ */
+const allowServiceToken = (_req: Request, res: ExpressResponse, next: NextFunction) => {
+  res.locals.allowServiceToken = true;
+  next();
+}
+
 /**
  * Middleware que exige `Authorization: Bearer <token>` com JWT válido.
  * Em caso de falha responde 401 e não chama `next()`.
@@ -79,7 +93,14 @@ const verifyToken = (req: Request, res: ExpressResponse, next: NextFunction) => 
     const resp = Response.unauthorized('Token inválido');
     return res.status(resp.status).json({ message: resp.message });
   }
+
+  // Token de serviço: só leitura (GET/HEAD), salvo rota marcada com `allowServiceToken`.
+  const user = res.locals.user as JwtPayload;
+  if (user.tokenType === 'service' && !SERVICE_SAFE_METHODS.includes(req.method) && !res.locals.allowServiceToken) {
+    const resp = Response.forbidden('Token de serviço permite apenas consultas');
+    return res.status(resp.status).json({ message: resp.message });
+  }
   next();
 }
 
-export { sign, verifyToken, assertJwtSecret };
+export { sign, verifyToken, allowServiceToken, assertJwtSecret };
