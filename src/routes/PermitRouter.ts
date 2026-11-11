@@ -1,6 +1,8 @@
 import { Router } from "express";
 import PermitController from "../controllers/PermitController";
 import { verifyToken } from "../middlewares/Authentication";
+import { checkPermission } from "../middlewares/CheckPermission";
+import { PermissionEnum } from "../database/models/enums/PermissionEnum";
 
 const permitRouter = Router();
 
@@ -9,21 +11,21 @@ permitRouter.use(verifyToken);
 const controller = new PermitController();
 
 // POST - Criar permissão
-permitRouter.post("/", controller.createPermit.bind(controller));
+permitRouter.post("/", checkPermission("PERMISSOES", PermissionEnum.CREATE), controller.createPermit.bind(controller));
 
 // PUT - Atualizar permissão
-permitRouter.put("/:id", controller.updatePermit.bind(controller));
+permitRouter.put("/:id", checkPermission("PERMISSOES", PermissionEnum.UPDATE), controller.updatePermit.bind(controller));
 
 // DELETE - Remover permissão
-permitRouter.delete("/:id", controller.deletePermit.bind(controller));
+permitRouter.delete("/:id", checkPermission("PERMISSOES", PermissionEnum.DELETE), controller.deletePermit.bind(controller));
 
 // PATCH - Reativação (activated = true)
-permitRouter.patch("/:id/reactivate", controller.reactivatePermit.bind(controller));
+permitRouter.patch("/:id/reactivate", checkPermission("PERMISSOES", PermissionEnum.UPDATE), controller.reactivatePermit.bind(controller));
 
 // GET - Buscar permissão por ID
-permitRouter.get("/:id", controller.getPermit.bind(controller));
+permitRouter.get("/:id", checkPermission("PERMISSOES", PermissionEnum.READ), controller.getPermit.bind(controller));
 
 // GET - Buscar permissões com filtro (via query)
-permitRouter.get("/", controller.findPermits.bind(controller));
+permitRouter.get("/", checkPermission("PERMISSOES", PermissionEnum.READ), controller.findPermits.bind(controller));
 
 export default permitRouter;

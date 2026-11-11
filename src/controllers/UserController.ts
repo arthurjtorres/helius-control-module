@@ -1,12 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import UserService from "../services/UserService";
+import { JwtPayload } from "../middlewares/Authentication";
 
 class UserController {
  private service = new UserService();
 
   async createUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await this.service.createUser(req.body);
+      const result = await this.service.createUser({ ...req.body, createdBy: (res.locals.user as JwtPayload).userId }, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
       console.error("Erro ao criar usuário:", error);
@@ -17,7 +18,7 @@ class UserController {
   async updateUser(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const result = await this.service.updateUser(id, req.body);
+      const result = await this.service.updateUser(id, { ...req.body, updatedBy: (res.locals.user as JwtPayload).userId }, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
       console.error("Erro ao atualizar usuário:", error);
@@ -28,7 +29,7 @@ class UserController {
   async deleteUser(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const result = await this.service.deleteUser(id, res.locals.user.userId);
+      const result = await this.service.deleteUser(id, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
       console.error("Erro ao deletar usuário:", error);
@@ -40,7 +41,7 @@ class UserController {
   async reactivateUser(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const result = await this.service.reactivateUser(id, res.locals.user.userId);
+      const result = await this.service.reactivateUser(id, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
       console.error("Erro em reactivateUser:", error);

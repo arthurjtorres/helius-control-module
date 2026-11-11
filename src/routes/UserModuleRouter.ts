@@ -1,6 +1,8 @@
 import { Router } from "express";
 import UserModuleController from "../controllers/UserModuleController";
 import { verifyToken } from "../middlewares/Authentication";
+import { checkPermission } from "../middlewares/CheckPermission";
+import { PermissionEnum } from "../database/models/enums/PermissionEnum";
 
 const userModuleRouter = Router();
 
@@ -9,18 +11,18 @@ userModuleRouter.use(verifyToken);
 const controller = new UserModuleController();
 
 // POST - Criar vínculo usuário-módulo
-userModuleRouter.post("/", controller.createUserModule.bind(controller));
+userModuleRouter.post("/", checkPermission("PERMISSOES", PermissionEnum.CREATE), controller.createUserModule.bind(controller));
 
 // PUT - Atualizar vínculo por ID
-userModuleRouter.put("/:id", controller.updateUserModule.bind(controller));
+userModuleRouter.put("/:id", checkPermission("PERMISSOES", PermissionEnum.UPDATE), controller.updateUserModule.bind(controller));
 
 // DELETE - Deletar vínculo por ID
-userModuleRouter.delete("/:id", controller.deleteUserModule.bind(controller));
+userModuleRouter.delete("/:id", checkPermission("PERMISSOES", PermissionEnum.DELETE), controller.deleteUserModule.bind(controller));
 
 // GET - Buscar vínculo por ID
-userModuleRouter.get("/:id", controller.getUserModule.bind(controller));
+userModuleRouter.get("/:id", checkPermission("PERMISSOES", PermissionEnum.READ), controller.getUserModule.bind(controller));
 
 // GET - Buscar vínculos com filtros (query params)
-userModuleRouter.get("/", controller.findUserModules.bind(controller));
+userModuleRouter.get("/", checkPermission("PERMISSOES", PermissionEnum.READ), controller.findUserModules.bind(controller));
 
 export default userModuleRouter;
