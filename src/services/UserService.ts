@@ -14,9 +14,15 @@ import UserAppRoleModel from "../database/models/UserAppRoleModel";
 import AppRoleModel from "../database/models/AppRoleModel";
 import ModuleModel from "../database/models/ModuleModel";
 import ClearanceLevelModel from "../database/models/ClearanceLevelModel";
+import { JwtPayload } from "../middlewares/Authentication";
+import GrantGuard from "./GrantGuard";
+import { isStrictlyAbove } from "../utils/AccessPolicy";
 
 /** UUID em qualquer versão (validação de filtros de query). */
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Campos que o usuário pode alterar no próprio cadastro (autoatendimento). */
+const SELF_EDITABLE_FIELDS = ['userName', 'email', 'password', 'confirmPassword', 'updatedAt', 'updatedBy'];
 
 /** Nome do nível de acesso do usuário de sistema (bootstrap). */
 const SYSTEM_CLEARANCE = "SYSTEM_ADMIN";
@@ -24,11 +30,19 @@ const SYSTEM_CLEARANCE = "SYSTEM_ADMIN";
 class UserService {
   private model: ModelStatic<UserModel> = UserModel;
 
-  async createUser(data: UserInterface) {
+  /**
+   * Cria usuário. O nível concedido (`fkClearanceId`) precisa ser estritamente menor que o do ator.
+   * @param data Dados do usuário.
+   * @param actor Usuário autenticado (do token), que cria.
+   */
+  async createUser(data: UserInterface, actor: JwtPayload) {
     // 1. Validação ANTES de abrir transação (Economiza recursos)
     data.createdAt = new Date();
     const { error } = UserValidation.validate(data);
     if (error) return Response.badRequest(error.message);
+
+    const denied = await GrantGuard.canGrantClearance(actor, data.fkClearanceId);
+    if (denied) return denied;
 
     const transaction = await db.transaction();
     try {
@@ -78,13 +92,36 @@ class UserService {
     }
   }
 
-  async updateUser(userId: string, data: Partial<UserInterface>) {
+  /**
+   * Atualiza usuário.
+   * - Autoatendimento (`userId` do ator): só nome, e-mail e senha.
+   * - Outro usuário: o alvo precisa ter nível estritamente menor que o do ator, e um novo
+   *   `fkClearanceId` também.
+   * @param userId Usuário a atualizar.
+   * @param data Campos a alterar.
+   * @param actor Usuário autenticado (do token).
+   */
+  async updateUser(userId: string, data: Partial<UserInterface>, actor: JwtPayload) {
     if (!userId) return Response.badRequest("ID do usuário não informado");
 
     data.updatedAt = new Date();
 
     const { error } = UpdateValidationSchema.UpdateUserValidation.validate(data);
     if (error) return Response.badRequest(error.message);
+
+    if (userId === actor.userId) {
+      const forbidden = Object.keys(data).filter(k => !SELF_EDITABLE_FIELDS.includes(k));
+      if (forbidden.length) {
+        return Response.forbidden(`Autoatendimento não permite alterar: ${forbidden.join(', ')}.`);
+      }
+    } else {
+      const denied = await GrantGuard.canManageUser(actor, userId);
+      if (denied) return denied;
+      if (data.fkClearanceId) {
+        const deniedLevel = await GrantGuard.canGrantClearance(actor, data.fkClearanceId);
+        if (deniedLevel) return deniedLevel;
+      }
+    }
 
     const transaction = await db.transaction();
     try {
@@ -114,11 +151,13 @@ class UserService {
    * Desativa o usuário (exclusão lógica): `activated = false`. Nunca remove fisicamente.
    * O token já emitido continua válido até expirar (25 min); o login passa a ser recusado.
    * @param userId Usuário a desativar.
-   * @param updatedBy Usuário autenticado que executa a operação.
-   * @returns 403 para o usuário de sistema (bootstrap) e para a própria conta; 404 se inexistente ou já inativo.
+   * @param actor Usuário autenticado que executa a operação (do token).
+   * @returns 403 para o usuário de sistema (bootstrap), para a própria conta e para alvo de nível
+   * igual ou superior ao do ator; 404 se inexistente ou já inativo.
    */
-  async deleteUser(userId: string, updatedBy: string) {
+  async deleteUser(userId: string, actor: JwtPayload) {
     if (!userId) return Response.badRequest("ID do usuário não informado.");
+    const updatedBy = actor.userId;
 
     try {
       const target = await this.model.findOne({
@@ -133,6 +172,9 @@ class UserService {
       }
       if (target.userId === updatedBy) {
         return Response.forbidden("Não é possível desativar a própria conta.");
+      }
+      if (!isStrictlyAbove(actor, target.ClearanceLevel?.clearanceName)) {
+        return Response.forbidden("Não é permitido desativar usuário de nível igual ou superior ao seu.");
       }
 
       const [updated] = await this.model.update(
@@ -151,12 +193,23 @@ class UserService {
   /**
    * Reativa um usuário desativado (`activated = true`).
    * @param userId Usuário a reativar.
-   * @param updatedBy Usuário autenticado que executa a operação.
+   * @param actor Usuário autenticado que executa a operação (do token). O alvo precisa ter nível
+   * estritamente menor que o do ator.
    */
-  async reactivateUser(userId: string, updatedBy: string) {
+  async reactivateUser(userId: string, actor: JwtPayload) {
     if (!userId) return Response.badRequest("ID do usuário não informado.");
+    const updatedBy = actor.userId;
 
     try {
+      const target = await this.model.findOne({
+        where: { userId, activated: false },
+        include: [{ model: ClearanceLevelModel, as: 'ClearanceLevel' }],
+      }) as (UserModel & { ClearanceLevel?: ClearanceLevelModel | null }) | null;
+      if (!target) return Response.notFound("Usuário não encontrado ou já ativo!");
+      if (!isStrictlyAbove(actor, target.ClearanceLevel?.clearanceName)) {
+        return Response.forbidden("Não é permitido reativar usuário de nível igual ou superior ao seu.");
+      }
+
       const [updated] = await this.model.update(
         { activated: true, updatedBy, updatedAt: new Date() },
         { where: { userId, activated: false } }

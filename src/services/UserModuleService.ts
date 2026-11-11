@@ -4,25 +4,43 @@ import UserModuleInterface from "../database/interfaces/UserModuleInterface";
 import Response from "../utils/Response";
 import CreateValidationSchema from "./validations/CreateValidationSchema";
 import UpdateValidationSchema from "./validations/UpdateValidationSchema";
+import { JwtPayload } from "../middlewares/Authentication";
+import GrantGuard, { GrantDenial } from "./GrantGuard";
 
 class UserModuleService {
   private model: ModelStatic<UserModuleModel> = UserModuleModel;
 
-  async createUserModule(data: UserModuleInterface) {
+  /**
+   * Confere se o ator pode dar/retirar o módulo ao usuário (regra do criador):
+   * usuário alvo de nível estritamente menor e módulo que o próprio ator possui.
+   */
+  private async guard(actor: JwtPayload, link: { fkUserId: string; fkModuleId: string }): Promise<GrantDenial> {
+    return (await GrantGuard.canManageUser(actor, link.fkUserId)) ?? (await GrantGuard.canGrantAccess(actor, { fkModuleId: link.fkModuleId }));
+  }
+
+  async createUserModule(data: UserModuleInterface, actor: JwtPayload) {
     data.createdAt = new Date();
     const { error } = CreateValidationSchema.UserModuleValidation.validate(data);
     if (error) return Response.badRequest(error.message);
+
+    const denied = await this.guard(actor, data);
+    if (denied) return denied;
 
     await this.model.create({ ...data });
     return Response.created("Vínculo de usuário ao módulo criado com sucesso!");
   }
 
-  async updateUserModule(id: string, data: Partial<UserModuleInterface>) {
+  async updateUserModule(id: string, data: Partial<UserModuleInterface>, actor: JwtPayload) {
     if(!id) return Response.badRequest("ID não informado");
     data.updatedAt = new Date();
 
     const { error } = UpdateValidationSchema.UpdateValidation.validate(data);    
     if (error) return Response.badRequest(error.message);
+
+    const current = await this.model.findByPk(id);
+    if (!current) return Response.notFound("Vínculo não encontrado!");
+    const denied = (await this.guard(actor, current)) ?? (await this.guard(actor, { ...current.get(), ...data }));
+    if (denied) return denied;
 
     const [updated] = await this.model.update(data, {
       where: { userModuleId: id },
@@ -34,7 +52,12 @@ class UserModuleService {
     return Response.ok("Vínculo atualizado com sucesso!", result);
   }
 
-  async deleteUserModule(id: string) {
+  async deleteUserModule(id: string, actor: JwtPayload) {
+    const current = await this.model.findByPk(id);
+    if (!current) return Response.notFound("Vínculo não encontrado!");
+    const denied = await this.guard(actor, current);
+    if (denied) return denied;
+
     const deleted = await this.model.destroy({
       where: { userModuleId: id },
     });
