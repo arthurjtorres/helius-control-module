@@ -6,7 +6,7 @@ class UserModuleController {
 
   async createUserModule(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await this.service.createUserModule(req.body);
+      const result = await this.service.createUserModule({ ...req.body, createdBy: res.locals.user.userId }, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
       console.error("Erro em createUserModule:", error);
@@ -17,7 +17,7 @@ class UserModuleController {
   async updateUserModule(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const result = await this.service.updateUserModule(id, req.body);
+      const result = await this.service.updateUserModule(id, { ...req.body, updatedBy: res.locals.user.userId }, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
       console.error("Erro em updateUserModule:", error);
@@ -28,7 +28,7 @@ class UserModuleController {
   async deleteUserModule(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const result = await this.service.deleteUserModule(id);
+      const result = await this.service.deleteUserModule(id, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
       console.error("Erro em deleteUserModule:", error);
