@@ -48,6 +48,10 @@ class Response {
     return { status: 422, message };
   }
 
+  static tooManyRequests(message: string = "Muitas tentativas. Tente novamente mais tarde."): ErrorResponse {
+    return { status: 429, message };
+  }
+
   static internalError(message: string = "Erro interno do servidor"): ErrorResponse {
     return { status: 500, message };
   }
