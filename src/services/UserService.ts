@@ -4,6 +4,7 @@ import UserInterface from "../database/interfaces/UserInterface";
 import UserValidation from "./validations/UserValidation";
 import UpdateValidationSchema from "./validations/UpdateValidationSchema";
 import Response from "../utils/Response";
+import { logError } from "../utils/logError";
 import { UserTypeEnum } from "../database/models/enums/UserTypeEnum";
 import EmployeeUserModel from "../database/models/EmployeeUserModel";
 import ExternalUserModel from "../database/models/ExternalUserModel";
@@ -85,10 +86,10 @@ class UserService {
       await transaction.commit(); // Se tudo deu certo, salva no banco
       return Response.created("Usuário Cadastrado!");
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       await transaction.rollback(); // Se algo falhou, desfaz TUDO
-      console.error("Erro no createUser:", error);
-      return Response.internalError(error.message || "Erro inesperado ao criar usuário");
+      logError("createUser", error);
+      return Response.internalError("Erro inesperado ao criar usuário.");
     }
   }
 
@@ -140,9 +141,10 @@ class UserService {
       });
       return Response.ok("Usuário atualizado com sucesso!", result);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       await transaction.rollback();
-      return Response.internalError(error.message);
+      logError("updateUser", error);
+      return Response.internalError("Erro inesperado ao atualizar usuário.");
 
     }
   }
@@ -184,9 +186,9 @@ class UserService {
       if (!updated) return Response.notFound("Usuário não encontrado para exclusão!");
 
       return Response.ok("Usuário desativado com sucesso");
-    } catch (error: any) {
-      console.error("Erro no deleteUser:", error);
-      return Response.internalError("Falha na exclusão: " + error.message);
+    } catch (error: unknown) {
+      logError("deleteUser", error);
+      return Response.internalError("Erro inesperado ao desativar usuário.");
     }
   }
 
@@ -216,9 +218,9 @@ class UserService {
       );
       if (!updated) return Response.notFound("Usuário não encontrado ou já ativo!");
       return Response.ok("Usuário reativado com sucesso");
-    } catch (error: any) {
-      console.error("Erro no reactivateUser:", error);
-      return Response.internalError(error.message);
+    } catch (error: unknown) {
+      logError("reactivateUser", error);
+      return Response.internalError("Erro inesperado ao reativar usuário.");
     }
   }
 
@@ -250,8 +252,9 @@ class UserService {
 
       const enrichedUser = await enrichUserData(result.toJSON());
       return Response.ok("Usuário encontrado com sucesso!", enrichedUser);
-    } catch (error: any) {
-      return Response.internalError(error.message);
+    } catch (error: unknown) {
+      logError("getUser", error);
+      return Response.internalError("Erro inesperado ao buscar usuário.");
     }
   }
 
@@ -296,8 +299,9 @@ class UserService {
 
       const enriched = await Promise.all(users.map(u => enrichUserData(u.toJSON())));
       return Response.ok("Usuários encontrados com sucesso", enriched);
-    } catch (error: any) {
-      return Response.internalError(error.message);
+    } catch (error: unknown) {
+      logError("findUsers", error);
+      return Response.internalError("Erro inesperado ao buscar usuários.");
     }
   }
 }
