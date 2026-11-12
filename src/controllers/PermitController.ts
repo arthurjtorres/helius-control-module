@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from "express";
+import { logError } from "../utils/logError";
+import Resp from "../utils/Response";
 import PermitService from "../services/PermitService";
 
 class PermitController {
@@ -9,8 +11,9 @@ class PermitController {
       const result = await this.service.createPermit(req.body);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em createPermit:", error);
-      return res.status(500).json("Erro interno ao criar permissão.");
+      logError("Erro em createPermit", error);
+      const resp = Resp.internalError("Erro interno ao criar permissão.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -20,8 +23,9 @@ class PermitController {
       const result = await this.service.updatePermit(id, req.body);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em updatePermit:", error);
-      return res.status(500).json("Erro interno ao atualizar permissão.");
+      logError("Erro em updatePermit", error);
+      const resp = Resp.internalError("Erro interno ao atualizar permissão.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -31,8 +35,9 @@ class PermitController {
       const result = await this.service.deletePermit(id, res.locals.user.userId);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em deletePermit:", error);
-      return res.status(500).json("Erro interno ao deletar permissão.");
+      logError("Erro em deletePermit", error);
+      const resp = Resp.internalError("Erro interno ao deletar permissão.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -43,8 +48,9 @@ class PermitController {
       const result = await this.service.reactivatePermit(id, res.locals.user.userId);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em reactivatePermit:", error);
-      return res.status(500).json("Erro interno ao reativar registro.");
+      logError("Erro em reactivatePermit", error);
+      const resp = Resp.internalError("Erro interno ao reativar registro.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -54,8 +60,9 @@ class PermitController {
       const result = await this.service.getPermit(id);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em getPermit:", error);
-      return res.status(500).json("Erro interno ao buscar permissão.");
+      logError("Erro em getPermit", error);
+      const resp = Resp.internalError("Erro interno ao buscar permissão.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -64,8 +71,9 @@ class PermitController {
       const result = await this.service.findPermits(req.query);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em findPermits:", error);
-      return res.status(500).json("Erro interno ao buscar permissões.");
+      logError("Erro em findPermits", error);
+      const resp = Resp.internalError("Erro interno ao buscar permissões.");
+      return res.status(resp.status).json(resp);
     }
   }
 }

@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from "express";
+import { logError } from "../utils/logError";
+import Resp from "../utils/Response";
 import ModuleService from "../services/ModuleService";
 
 class ModuleController {
@@ -9,8 +11,9 @@ class ModuleController {
       const result = await this.service.createModule(req.body);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro ao criar módulo:", error);
-      return res.status(500).json("Erro interno ao criar módulo.");
+      logError("Erro ao criar módulo", error);
+      const resp = Resp.internalError("Erro interno ao criar módulo.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -20,8 +23,9 @@ class ModuleController {
       const result = await this.service.updateModule(id, req.body);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro ao atualizar módulo:", error);
-      return res.status(500).json("Erro interno ao atualizar módulo.");
+      logError("Erro ao atualizar módulo", error);
+      const resp = Resp.internalError("Erro interno ao atualizar módulo.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -31,8 +35,9 @@ class ModuleController {
       const result = await this.service.deleteModule(id, res.locals.user.userId);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro ao deletar módulo:", error);
-      return res.status(500).json("Erro interno ao deletar módulo.");
+      logError("Erro ao deletar módulo", error);
+      const resp = Resp.internalError("Erro interno ao deletar módulo.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -43,8 +48,9 @@ class ModuleController {
       const result = await this.service.reactivateModule(id, res.locals.user.userId);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em reactivateModule:", error);
-      return res.status(500).json("Erro interno ao reativar registro.");
+      logError("Erro em reactivateModule", error);
+      const resp = Resp.internalError("Erro interno ao reativar registro.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -54,8 +60,9 @@ class ModuleController {
       const result = await this.service.getModule(id);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro ao buscar módulo:", error);
-      return res.status(500).json("Erro interno ao buscar módulo.");
+      logError("Erro ao buscar módulo", error);
+      const resp = Resp.internalError("Erro interno ao buscar módulo.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -64,8 +71,9 @@ class ModuleController {
       const result = await this.service.findModules(req.query);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro ao buscar módulos:", error);
-      return res.status(500).json("Erro interno ao buscar módulos.");
+      logError("Erro ao buscar módulos", error);
+      const resp = Resp.internalError("Erro interno ao buscar módulos.");
+      return res.status(resp.status).json(resp);
     }
   }
 }
