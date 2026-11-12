@@ -8,7 +8,7 @@ class AppRoleController {
 
   async createAppRole(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await this.service.createAppRole(req.body);
+      const result = await this.service.createAppRole({ ...req.body, createdBy: res.locals.user.userId });
       return res.status(result.status).json(result);
     } catch (error) {
       logError("Erro em createAppRole", error);
@@ -20,7 +20,7 @@ class AppRoleController {
   async updateAppRole(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const result = await this.service.updateAppRole(id, req.body);
+      const result = await this.service.updateAppRole(id, { ...req.body, updatedBy: res.locals.user.userId });
       return res.status(result.status).json(result);
     } catch (error) {
       logError("Erro em updateAppRole", error);
