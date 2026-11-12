@@ -8,7 +8,7 @@ class MenuController {
 
   async createMenu(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await this.service.createMenu(req.body);
+      const result = await this.service.createMenu({ ...req.body, createdBy: res.locals.user.userId });
       return res.status(result.status).json(result);
     } catch (error) {
       logError("Erro em createMenu", error);
@@ -20,7 +20,7 @@ class MenuController {
   async updateMenu(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const result = await this.service.updateMenu(id, req.body);
+      const result = await this.service.updateMenu(id, { ...req.body, updatedBy: res.locals.user.userId });
       return res.status(result.status).json(result);
     } catch (error) {
       logError("Erro em updateMenu", error);
