@@ -16,6 +16,7 @@ import PermitModel from '../database/models/PermitModel';
 import ClearanceLevelModel from '../database/models/ClearanceLevelModel';
 import UserModuleModel from '../database/models/UserModuleModel';
 import { MenuPermission, UserModuleRole } from '../middlewares/Authentication';
+import { logError } from "../utils/logError";
 
 /** Vínculo role → menu → permissão, como carregado no login. */
 interface AppRolePermitWithRelations extends AppRolePermitModel {
@@ -202,7 +203,7 @@ class AuthService {
 
     } catch (error: unknown) {
       // Detalhe só no log do servidor (sem senha nem token); o cliente recebe mensagem genérica
-      console.error("Erro no login:", error instanceof Error ? error.message : error);
+      logError("login", error);
       return Response.internalError("Erro ao processar autenticação.");
     }
   }
