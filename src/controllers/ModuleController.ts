@@ -8,7 +8,7 @@ class ModuleController {
 
   async createModule(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await this.service.createModule(req.body);
+      const result = await this.service.createModule({ ...req.body, createdBy: res.locals.user.userId });
       return res.status(result.status).json(result);
     } catch (error) {
       logError("Erro ao criar módulo", error);
@@ -20,7 +20,7 @@ class ModuleController {
   async updateModule(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const result = await this.service.updateModule(id, req.body);
+      const result = await this.service.updateModule(id, { ...req.body, updatedBy: res.locals.user.userId });
       return res.status(result.status).json(result);
     } catch (error) {
       logError("Erro ao atualizar módulo", error);
