@@ -1,5 +1,6 @@
 import { getEmployeeById } from "./EmployeeService";
 import { getPersonById } from "./PersonService";
+import { logError } from "../../utils/logError";
 
 export const enrichUserData = async (user: any) => {
   try {
@@ -16,8 +17,8 @@ export const enrichUserData = async (user: any) => {
       employee: employeeData,
       person: personData,
     };
-  } catch (error: any) {
-    console.error("Erro ao enriquecer dados do usuário:", error.message);
+  } catch (error: unknown) {
+    logError("enrichUserData", error);
     return user; // Retorna o dado parcial se falhar
   }
 };

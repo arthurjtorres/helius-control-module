@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from "express";
+import { logError } from "../utils/logError";
+import Resp from "../utils/Response";
 import AppRoleService from "../services/AppRoleService";
 
 class AppRoleController {
@@ -9,8 +11,9 @@ class AppRoleController {
       const result = await this.service.createAppRole(req.body);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em createAppRole:", error);
-      return res.status(500).json("Erro interno ao criar a função.");
+      logError("Erro em createAppRole", error);
+      const resp = Resp.internalError("Erro interno ao criar a função.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -20,8 +23,9 @@ class AppRoleController {
       const result = await this.service.updateAppRole(id, req.body);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em updateAppRole:", error);
-      return res.status(500).json("Erro interno ao atualizar a função.");
+      logError("Erro em updateAppRole", error);
+      const resp = Resp.internalError("Erro interno ao atualizar a função.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -31,8 +35,9 @@ class AppRoleController {
       const result = await this.service.deleteAppRole(id, res.locals.user.userId);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em deleteAppRole:", error);
-      return res.status(500).json("Erro interno ao deletar a função.");
+      logError("Erro em deleteAppRole", error);
+      const resp = Resp.internalError("Erro interno ao deletar a função.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -43,8 +48,9 @@ class AppRoleController {
       const result = await this.service.reactivateAppRole(id, res.locals.user.userId);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em reactivateAppRole:", error);
-      return res.status(500).json("Erro interno ao reativar registro.");
+      logError("Erro em reactivateAppRole", error);
+      const resp = Resp.internalError("Erro interno ao reativar registro.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -54,8 +60,9 @@ class AppRoleController {
       const result = await this.service.getAppRole(id);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em getAppRole:", error);
-      return res.status(500).json("Erro interno ao buscar a função.");
+      logError("Erro em getAppRole", error);
+      const resp = Resp.internalError("Erro interno ao buscar a função.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -64,8 +71,9 @@ class AppRoleController {
       const result = await this.service.findAppRoles(req.query);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em findAppRoles:", error);
-      return res.status(500).json("Erro interno ao buscar funções.");
+      logError("Erro em findAppRoles", error);
+      const resp = Resp.internalError("Erro interno ao buscar funções.");
+      return res.status(resp.status).json(resp);
     }
   }
 }

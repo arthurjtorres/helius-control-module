@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from "express";
+import { logError } from "../utils/logError";
+import Resp from "../utils/Response";
 import UserAppRoleService from "../services/UserAppRoleService";
 
 class UserAppRoleController {
@@ -9,8 +11,9 @@ class UserAppRoleController {
       const result = await this.service.createUserAppRole({ ...req.body, createdBy: res.locals.user.userId }, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em createUserAppRole:", error);
-      return res.status(500).json("Erro interno ao criar vínculo de papel.");
+      logError("Erro em createUserAppRole", error);
+      const resp = Resp.internalError("Erro interno ao criar vínculo de papel.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -20,8 +23,9 @@ class UserAppRoleController {
       const result = await this.service.updateUserAppRole(id, { ...req.body, updatedBy: res.locals.user.userId }, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em updateUserAppRole:", error);
-      return res.status(500).json("Erro interno ao atualizar vínculo de papel.");
+      logError("Erro em updateUserAppRole", error);
+      const resp = Resp.internalError("Erro interno ao atualizar vínculo de papel.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -31,8 +35,9 @@ class UserAppRoleController {
       const result = await this.service.deleteUserAppRole(id, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em deleteUserAppRole:", error);
-      return res.status(500).json("Erro interno ao deletar vínculo de papel.");
+      logError("Erro em deleteUserAppRole", error);
+      const resp = Resp.internalError("Erro interno ao deletar vínculo de papel.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -42,8 +47,9 @@ class UserAppRoleController {
       const result = await this.service.getUserAppRole(id);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em getUserAppRole:", error);
-      return res.status(500).json("Erro interno ao buscar vínculo de papel.");
+      logError("Erro em getUserAppRole", error);
+      const resp = Resp.internalError("Erro interno ao buscar vínculo de papel.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -52,8 +58,9 @@ class UserAppRoleController {
       const result = await this.service.findUserAppRoles(req.query);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em findUserAppRoles:", error);
-      return res.status(500).json("Erro interno ao buscar vínculos de papel.");
+      logError("Erro em findUserAppRoles", error);
+      const resp = Resp.internalError("Erro interno ao buscar vínculos de papel.");
+      return res.status(resp.status).json(resp);
     }
   }
 }
