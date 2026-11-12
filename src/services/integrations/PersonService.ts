@@ -1,13 +1,13 @@
 import axiosRegistry from "./axiosInstance";
 import { registryRoutes } from "./endpoints";
+import { logError } from "../../utils/logError";
 
 export const getPersonById = async (id: string) => {
   try {
     const response = await axiosRegistry.get(registryRoutes.getPersonById(id));
     return response.data;
-  } catch (error: any) {
-    console.error(`Erro ao buscar person ${id}:`, error.message);
-    console.log('url: ',registryRoutes.getPersonById(id));
+  } catch (error: unknown) {
+    logError("getPersonById", error);
     return null;
   }
 };

@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from "express";
+import { logError } from "../utils/logError";
+import Resp from "../utils/Response";
 import ClearanceLevelService from "../services/ClearanceLevelService";
 
 class ClearanceLevelController {
@@ -9,8 +11,9 @@ class ClearanceLevelController {
       const result = await this.service.createClearanceLevel(req.body);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em createClearanceLevel:", error);
-      return res.status(500).json("Erro interno ao criar nível de acesso.");
+      logError("Erro em createClearanceLevel", error);
+      const resp = Resp.internalError("Erro interno ao criar nível de acesso.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -20,8 +23,9 @@ class ClearanceLevelController {
       const result = await this.service.updateClearanceLevel(id, req.body);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em updateClearanceLevel:", error);
-      return res.status(500).json("Erro interno ao atualizar nível de acesso.");
+      logError("Erro em updateClearanceLevel", error);
+      const resp = Resp.internalError("Erro interno ao atualizar nível de acesso.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -31,8 +35,9 @@ class ClearanceLevelController {
       const result = await this.service.deleteClearanceLevel(id, res.locals.user.userId);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em deleteClearanceLevel:", error);
-      return res.status(500).json("Erro interno ao deletar nível de acesso.");
+      logError("Erro em deleteClearanceLevel", error);
+      const resp = Resp.internalError("Erro interno ao deletar nível de acesso.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -43,8 +48,9 @@ class ClearanceLevelController {
       const result = await this.service.reactivateClearanceLevel(id, res.locals.user.userId);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em reactivateClearanceLevel:", error);
-      return res.status(500).json("Erro interno ao reativar registro.");
+      logError("Erro em reactivateClearanceLevel", error);
+      const resp = Resp.internalError("Erro interno ao reativar registro.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -54,8 +60,9 @@ class ClearanceLevelController {
       const result = await this.service.getClearanceLevel(id);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em getClearanceLevel:", error);
-      return res.status(500).json("Erro interno ao buscar nível de acesso.");
+      logError("Erro em getClearanceLevel", error);
+      const resp = Resp.internalError("Erro interno ao buscar nível de acesso.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -64,8 +71,9 @@ class ClearanceLevelController {
       const result = await this.service.findClearanceLevels(req.query);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em findClearanceLevels:", error);
-      return res.status(500).json("Erro interno ao buscar níveis de acesso.");
+      logError("Erro em findClearanceLevels", error);
+      const resp = Resp.internalError("Erro interno ao buscar níveis de acesso.");
+      return res.status(resp.status).json(resp);
     }
   }
 }

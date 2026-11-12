@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from "express";
+import { logError } from "../utils/logError";
+import Resp from "../utils/Response";
 import MenuService from "../services/MenuService";
 
 class MenuController {
@@ -9,8 +11,9 @@ class MenuController {
       const result = await this.service.createMenu(req.body);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em createMenu:", error);
-      return res.status(500).json("Erro interno ao criar menu.");
+      logError("Erro em createMenu", error);
+      const resp = Resp.internalError("Erro interno ao criar menu.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -20,8 +23,9 @@ class MenuController {
       const result = await this.service.updateMenu(id, req.body);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em updateMenu:", error);
-      return res.status(500).json("Erro interno ao atualizar menu.");
+      logError("Erro em updateMenu", error);
+      const resp = Resp.internalError("Erro interno ao atualizar menu.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -31,8 +35,9 @@ class MenuController {
       const result = await this.service.deleteMenu(id, res.locals.user.userId);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em deleteMenu:", error);
-      return res.status(500).json("Erro interno ao deletar menu.");
+      logError("Erro em deleteMenu", error);
+      const resp = Resp.internalError("Erro interno ao deletar menu.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -43,8 +48,9 @@ class MenuController {
       const result = await this.service.reactivateMenu(id, res.locals.user.userId);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em reactivateMenu:", error);
-      return res.status(500).json("Erro interno ao reativar registro.");
+      logError("Erro em reactivateMenu", error);
+      const resp = Resp.internalError("Erro interno ao reativar registro.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -54,8 +60,9 @@ class MenuController {
       const result = await this.service.getMenu(id);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em getMenu:", error);
-      return res.status(500).json("Erro interno ao buscar menu.");
+      logError("Erro em getMenu", error);
+      const resp = Resp.internalError("Erro interno ao buscar menu.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -64,8 +71,9 @@ class MenuController {
       const result = await this.service.findMenus(req.query);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em findMenus:", error);
-      return res.status(500).json("Erro interno ao buscar menus.");
+      logError("Erro em findMenus", error);
+      const resp = Resp.internalError("Erro interno ao buscar menus.");
+      return res.status(resp.status).json(resp);
     }
   }
 }

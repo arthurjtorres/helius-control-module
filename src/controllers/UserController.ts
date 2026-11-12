@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from "express";
+import { logError } from "../utils/logError";
+import Resp from "../utils/Response";
 import UserService from "../services/UserService";
 import { JwtPayload } from "../middlewares/Authentication";
 
@@ -10,8 +12,9 @@ class UserController {
       const result = await this.service.createUser({ ...req.body, createdBy: (res.locals.user as JwtPayload).userId }, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro ao criar usuário:", error);
-      return res.status(500).json("Erro interno ao criar usuário");
+      logError("Erro ao criar usuário", error);
+      const resp = Resp.internalError("Erro interno ao criar usuário");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -21,8 +24,9 @@ class UserController {
       const result = await this.service.updateUser(id, { ...req.body, updatedBy: (res.locals.user as JwtPayload).userId }, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro ao atualizar usuário:", error);
-      return res.status(500).json("Erro interno ao atualizar usuário");
+      logError("Erro ao atualizar usuário", error);
+      const resp = Resp.internalError("Erro interno ao atualizar usuário");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -32,8 +36,9 @@ class UserController {
       const result = await this.service.deleteUser(id, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro ao deletar usuário:", error);
-      return res.status(500).json("Erro interno ao deletar usuário");
+      logError("Erro ao deletar usuário", error);
+      const resp = Resp.internalError("Erro interno ao deletar usuário");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -44,8 +49,9 @@ class UserController {
       const result = await this.service.reactivateUser(id, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em reactivateUser:", error);
-      return res.status(500).json("Erro interno ao reativar registro.");
+      logError("Erro em reactivateUser", error);
+      const resp = Resp.internalError("Erro interno ao reativar registro.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -55,8 +61,9 @@ class UserController {
       const result = await this.service.getUser(id);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro ao buscar usuário:", error);
-      return res.status(500).json("Erro interno ao buscar usuário");
+      logError("Erro ao buscar usuário", error);
+      const resp = Resp.internalError("Erro interno ao buscar usuário");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -65,8 +72,9 @@ class UserController {
       const result = await this.service.findUsers(req.query);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro ao buscar usuários:", error);
-      return res.status(500).json("Erro interno ao buscar usuários");
+      logError("Erro ao buscar usuários", error);
+      const resp = Resp.internalError("Erro interno ao buscar usuários");
+      return res.status(resp.status).json(resp);
     }
   }
 }
