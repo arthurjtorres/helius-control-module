@@ -8,7 +8,7 @@ class PermitController {
 
   async createPermit(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await this.service.createPermit(req.body);
+      const result = await this.service.createPermit({ ...req.body, createdBy: res.locals.user.userId });
       return res.status(result.status).json(result);
     } catch (error) {
       logError("Erro em createPermit", error);
@@ -20,7 +20,7 @@ class PermitController {
   async updatePermit(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const result = await this.service.updatePermit(id, req.body);
+      const result = await this.service.updatePermit(id, { ...req.body, updatedBy: res.locals.user.userId });
       return res.status(result.status).json(result);
     } catch (error) {
       logError("Erro em updatePermit", error);
