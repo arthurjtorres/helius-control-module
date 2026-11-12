@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from "express";
+import { logError } from "../utils/logError";
+import Resp from "../utils/Response";
 import AppRolePermitService from "../services/AppRolePermitService";
 
 class AppRolePermitController {
@@ -9,8 +11,9 @@ class AppRolePermitController {
       const result = await this.service.createAppRolePermit(req.body);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em createAppRolePermit:", error);
-      return res.status(500).json("Erro interno ao atribuir permissão ao papel.");
+      logError("Erro em createAppRolePermit", error);
+      const resp = Resp.internalError("Erro interno ao atribuir permissão ao papel.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -20,8 +23,9 @@ class AppRolePermitController {
       const result = await this.service.updateAppRolePermit(id, req.body);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em updateAppRolePermit:", error);
-      return res.status(500).json("Erro interno ao atualizar associação.");
+      logError("Erro em updateAppRolePermit", error);
+      const resp = Resp.internalError("Erro interno ao atualizar associação.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -31,8 +35,9 @@ class AppRolePermitController {
       const result = await this.service.deleteAppRolePermit(id);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em deleteAppRolePermit:", error);
-      return res.status(500).json("Erro interno ao remover associação.");
+      logError("Erro em deleteAppRolePermit", error);
+      const resp = Resp.internalError("Erro interno ao remover associação.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -42,8 +47,9 @@ class AppRolePermitController {
       const result = await this.service.getAppRolePermit(id);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em getAppRolePermit:", error);
-      return res.status(500).json("Erro interno ao buscar associação.");
+      logError("Erro em getAppRolePermit", error);
+      const resp = Resp.internalError("Erro interno ao buscar associação.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -52,8 +58,9 @@ class AppRolePermitController {
       const result = await this.service.findAppRolePermits(req.query);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em findAppRolePermits:", error);
-      return res.status(500).json("Erro interno ao buscar permissões vinculadas.");
+      logError("Erro em findAppRolePermits", error);
+      const resp = Resp.internalError("Erro interno ao buscar permissões vinculadas.");
+      return res.status(resp.status).json(resp);
     }
   }
 }

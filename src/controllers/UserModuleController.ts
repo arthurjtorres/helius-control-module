@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from "express";
+import { logError } from "../utils/logError";
+import Resp from "../utils/Response";
 import UserModuleService from "../services/UserModuleService";
 
 class UserModuleController {
@@ -9,8 +11,9 @@ class UserModuleController {
       const result = await this.service.createUserModule({ ...req.body, createdBy: res.locals.user.userId }, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em createUserModule:", error);
-      return res.status(500).json("Erro interno ao criar vínculo.");
+      logError("Erro em createUserModule", error);
+      const resp = Resp.internalError("Erro interno ao criar vínculo.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -20,8 +23,9 @@ class UserModuleController {
       const result = await this.service.updateUserModule(id, { ...req.body, updatedBy: res.locals.user.userId }, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em updateUserModule:", error);
-      return res.status(500).json("Erro interno ao atualizar vínculo.");
+      logError("Erro em updateUserModule", error);
+      const resp = Resp.internalError("Erro interno ao atualizar vínculo.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -31,8 +35,9 @@ class UserModuleController {
       const result = await this.service.deleteUserModule(id, res.locals.user);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em deleteUserModule:", error);
-      return res.status(500).json("Erro interno ao deletar vínculo.");
+      logError("Erro em deleteUserModule", error);
+      const resp = Resp.internalError("Erro interno ao deletar vínculo.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -42,8 +47,9 @@ class UserModuleController {
       const result = await this.service.getUserModule(id);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em getUserModule:", error);
-      return res.status(500).json("Erro interno ao buscar vínculo.");
+      logError("Erro em getUserModule", error);
+      const resp = Resp.internalError("Erro interno ao buscar vínculo.");
+      return res.status(resp.status).json(resp);
     }
   }
 
@@ -52,8 +58,9 @@ class UserModuleController {
       const result = await this.service.findUserModules(req.query);
       return res.status(result.status).json(result);
     } catch (error) {
-      console.error("Erro em findUserModules:", error);
-      return res.status(500).json("Erro interno ao buscar vínculos.");
+      logError("Erro em findUserModules", error);
+      const resp = Resp.internalError("Erro interno ao buscar vínculos.");
+      return res.status(resp.status).json(resp);
     }
   }
 }
