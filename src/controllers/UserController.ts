@@ -42,6 +42,18 @@ class UserController {
     }
   }
 
+  /** POST /deactivate-by-employee — demissão (T20); só token de serviço. */
+  async deactivateByEmployee(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await this.service.deactivateByEmployee(req.body?.employeeIds, req.body?.updatedBy);
+      return res.status(result.status).json(result);
+    } catch (error) {
+      logError("Erro ao desativar usuários por funcionário", error);
+      const resp = Resp.internalError("Erro interno ao desativar usuários por funcionário");
+      return res.status(resp.status).json(resp);
+    }
+  }
+
   /** PATCH /:id/reactivate — reativa o registro (`activated = true`). */
   async reactivateUser(req: Request, res: Response, next: NextFunction) {
     try {
