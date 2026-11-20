@@ -1,14 +1,17 @@
 import { Router } from "express";
 import UserController from "../controllers/UserController";
-import { verifyToken } from "../middlewares/Authentication";
-import { checkPermission, checkPermissionOrSelf } from "../middlewares/CheckPermission";
+import { allowServiceToken, verifyToken } from "../middlewares/Authentication";
+import { checkPermission, checkPermissionOrSelf, requireServiceToken } from "../middlewares/CheckPermission";
 import { PermissionEnum } from "../database/models/enums/PermissionEnum";
 
 const userRouter = Router();
-
-// Todas as rotas deste router exigem token JWT válido
-userRouter.use(verifyToken);
 const controller = new UserController();
+
+// POST - Demissão (T20): só token de serviço do `registry`; antes do `use(verifyToken)` por causa do `allowServiceToken`
+userRouter.post("/deactivate-by-employee", allowServiceToken, verifyToken, requireServiceToken, controller.deactivateByEmployee.bind(controller));
+
+// Demais rotas deste router exigem token JWT válido
+userRouter.use(verifyToken);
 
 // POST - Criação de usuário
 userRouter.post("/", checkPermission("USUARIOS", PermissionEnum.CREATE), controller.createUser.bind(controller));

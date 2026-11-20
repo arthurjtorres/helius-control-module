@@ -1,7 +1,7 @@
 import { ModelStatic, Op } from "sequelize";
 import UserModel from "../database/models/UserModel";
 import UserInterface from "../database/interfaces/UserInterface";
-import UserValidation from "./validations/UserValidation";
+import UserValidation, { DeactivateByEmployeeValidation } from "./validations/UserValidation";
 import UpdateValidationSchema from "./validations/UpdateValidationSchema";
 import Response from "../utils/Response";
 import { logError } from "../utils/logError";
@@ -12,6 +12,7 @@ import { enrichUserData } from "../services/integrations/UserAggregator";
 import bcrypt from "bcrypt";
 import db from "../database/models/index"
 import UserAppRoleModel from "../database/models/UserAppRoleModel";
+import UserModuleModel from "../database/models/UserModuleModel";
 import AppRoleModel from "../database/models/AppRoleModel";
 import ModuleModel from "../database/models/ModuleModel";
 import ClearanceLevelModel from "../database/models/ClearanceLevelModel";
@@ -221,6 +222,48 @@ class UserService {
     } catch (error: unknown) {
       logError("reactivateUser", error);
       return Response.internalError("Erro inesperado ao reativar usuário.");
+    }
+  }
+
+  /**
+   * Demissão (T20, `04` §6.2): desativa os usuários vinculados aos funcionários e remove
+   * `user_module` e `user_app_role` (tabelas de ligação, remoção física). Chamado pelo `registry`
+   * com token de serviço. O usuário de sistema nunca é tocado.
+   * @param employeeIds Funcionários desligados.
+   * @param updatedBy Usuário que desligou (vem do `registry`, que o tirou do próprio token).
+   * @returns 200 com `{ deactivated: userId[] }` (vazio se nenhum vínculo); 400 se entrada inválida.
+   */
+  async deactivateByEmployee(employeeIds: unknown, updatedBy: unknown) {
+    const { error } = DeactivateByEmployeeValidation.validate({ employeeIds, updatedBy });
+    if (error) return Response.badRequest(error.message);
+    const ids = employeeIds as string[];
+
+    let transaction;
+    try {
+      const links = await EmployeeUserModel.findAll({ where: { fkEmployeeId: { [Op.in]: ids } }, attributes: ['fkUserId'] });
+      const users = links.length
+        ? await this.model.findAll({
+          where: { userId: { [Op.in]: links.map(l => l.fkUserId) }, userType: { [Op.ne]: UserTypeEnum.SISTEMA } },
+          attributes: ['userId'],
+        })
+        : [];
+      const userIds = users.map(u => u.userId);
+      if (!userIds.length) return Response.ok("Nenhum usuário vinculado aos funcionários.", { deactivated: [] });
+
+      transaction = await db.transaction();
+      const where = { fkUserId: { [Op.in]: userIds } };
+      await this.model.update(
+        { activated: false, updatedBy, updatedAt: new Date() },
+        { where: { userId: { [Op.in]: userIds }, activated: true }, transaction }
+      );
+      await UserModuleModel.destroy({ where, transaction });
+      await UserAppRoleModel.destroy({ where, transaction });
+      await transaction.commit();
+      return Response.ok("Usuários dos funcionários desligados desativados.", { deactivated: userIds });
+    } catch (error: unknown) {
+      await transaction?.rollback();
+      logError("deactivateByEmployee", error);
+      return Response.internalError("Erro inesperado ao desativar usuários dos funcionários.");
     }
   }
 

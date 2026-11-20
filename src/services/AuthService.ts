@@ -17,6 +17,7 @@ import ClearanceLevelModel from '../database/models/ClearanceLevelModel';
 import UserModuleModel from '../database/models/UserModuleModel';
 import { MenuPermission, UserModuleRole } from '../middlewares/Authentication';
 import { logError } from "../utils/logError";
+import { UserTypeEnum } from "../database/models/enums/UserTypeEnum";
 
 /** Vínculo role → menu → permissão, como carregado no login. */
 interface AppRolePermitWithRelations extends AppRolePermitModel {
@@ -162,11 +163,17 @@ class AuthService {
         return Response.unauthorized("Usuário ou senha inválidos.");
       }
 
+      // Mesma resposta de credenciais inválidas (04 §4)
       if (!user.activated) {
-        return Response.unauthorized("Esta conta está desativada. Entre em contato com o suporte.");
+        return Response.unauthorized("Usuário ou senha inválidos.");
       }
 
       const enrichedUser = await enrichUserData(user.toJSON());
+
+      // Colaborador sem funcionário ativo não entra; registry fora também recusa (T20, fail-closed)
+      if (user.userType === UserTypeEnum.COLABORADOR && !enrichedUser.employee) {
+        return Response.unauthorized("Usuário ou senha inválidos.");
+      }
 
       // Lógica para extrair o Nome Completo baseado no retorno da integração
       let fullName = user.userName; // Fallback

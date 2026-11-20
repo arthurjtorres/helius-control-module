@@ -72,3 +72,8 @@ const UserValidation = joi.object({
 
 })
 export default UserValidation;
+/** Corpo de `POST /user/deactivate-by-employee` (T20): até 5000 funcionários, como a desativação em lote. */
+export const DeactivateByEmployeeValidation = joi.object({
+  employeeIds: joi.array().items(joi.string().uuid().required()).min(1).max(5000).required(),
+  updatedBy: joi.string().uuid().required(),
+});

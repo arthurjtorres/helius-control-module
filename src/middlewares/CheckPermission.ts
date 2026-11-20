@@ -102,3 +102,12 @@ export const requireMinClearance = (minimum: ClearanceEnum) =>
     }
     return next();
   };
+
+/**
+ * Rota exclusiva de integração entre módulos: só token de serviço passa (ex.: demissão vinda do
+ * `registry`, T20). Deve vir depois de `allowServiceToken` e `verifyToken`.
+ */
+export const requireServiceToken = (_req: Request, res: ExpressResponse, next: NextFunction) =>
+  isServiceToken(res.locals.user as JwtPayload | undefined)
+    ? next()
+    : deny(res, Response.forbidden("Rota exclusiva de integração entre módulos."));
