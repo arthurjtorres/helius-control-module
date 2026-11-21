@@ -18,6 +18,9 @@ import UserModuleModel from '../database/models/UserModuleModel';
 import { MenuPermission, UserModuleRole } from '../middlewares/Authentication';
 import { logError } from "../utils/logError";
 import { UserTypeEnum } from "../database/models/enums/UserTypeEnum";
+import { ClearanceEnum, clearanceRank } from "../database/models/enums/ClearanceEnum";
+import UserCompanyModel from "../database/models/UserCompanyModel";
+import { EmployeeCompany, getGroupCompanyIds, RegistryUnavailableError } from "./integrations/CompanyService";
 
 /** Vínculo role → menu → permissão, como carregado no login. */
 interface AppRolePermitWithRelations extends AppRolePermitModel {
@@ -115,6 +118,20 @@ export const mapUserAccess = (
   };
 };
 
+/**
+ * Empresas visíveis do colaborador (T18, ADR-021): `SUPER_ADMIN`/`SYSTEM_ADMIN` veem o grupo inteiro;
+ * os demais, a própria empresa mais as concedidas em `user_company` que ainda estejam no grupo.
+ * @param company Empresa do funcionário (`GET /employee/:id`); sem empresa ativa → `[]`.
+ * @throws RegistryUnavailableError se o `registry` não listar o grupo.
+ */
+export const companyIdsFor = async (userId: string, clearance: string | undefined, company?: EmployeeCompany | null): Promise<string[]> => {
+  if (!company?.companyId) return [];
+  const group = await getGroupCompanyIds(company);
+  if (clearanceRank(clearance) >= clearanceRank(ClearanceEnum.SUPER_ADMIN)) return group;
+  const granted = await UserCompanyModel.findAll({ where: { fkUserId: userId }, attributes: ['fkCompanyId'] });
+  return [company.companyId, ...granted.map(g => g.fkCompanyId).filter(id => id !== company.companyId && group.includes(id))];
+};
+
 class AuthService {
   private modelUser: ModelStatic<UserModel> = UserModel;
   private modelUserRole: ModelStatic<UserAppRoleModel> = UserAppRoleModel;
@@ -175,6 +192,18 @@ class AuthService {
         return Response.unauthorized("Usuário ou senha inválidos.");
       }
 
+      // Empresas visíveis (T18): SISTEMA não é filtrado e EXTERNO não tem empresa; registry fora recusa (fail-closed)
+      let companyIds: string[] = [];
+      if (user.userType === UserTypeEnum.COLABORADOR) {
+        try {
+          companyIds = await companyIdsFor(user.userId, user.ClearanceLevel?.clearanceName, enrichedUser.employee?.Company);
+        } catch (error: unknown) {
+          if (!(error instanceof RegistryUnavailableError)) throw error;
+          logError("login: empresas do grupo", error);
+          return Response.unauthorized("Usuário ou senha inválidos.");
+        }
+      }
+
       // Lógica para extrair o Nome Completo baseado no retorno da integração
       let fullName = user.userName; // Fallback
 
@@ -201,7 +230,8 @@ class AuthService {
 
         modules: accessData.modules,
         roles: accessData.roles,
-        allowedMenus: accessData.permissions
+        allowedMenus: accessData.permissions,
+        companyIds,
       };
 
 
