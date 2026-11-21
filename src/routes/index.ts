@@ -9,6 +9,7 @@ import clearanceLevelRouter from "./ClearanceLevelRouter";
 import appRolePermitRouter from "./AppRolePermitRouter";
 import userAppRoleRouter from "./UserAppRoleRouter";
 import userModuleRouter from "./UserModuleRouter";
+import userCompanyRouter from "./UserCompanyRouter";
 import authRouter from "./AuthRouter";
 
 const router = Router();
@@ -23,5 +24,6 @@ router.use("/clearance-levels", clearanceLevelRouter);
 router.use("/app-role-permits", appRolePermitRouter);
 router.use("/user-app-roles", userAppRoleRouter);
 router.use("/user-modules", userModuleRouter);
+router.use("/user-companies", userCompanyRouter);
 
 export default router;

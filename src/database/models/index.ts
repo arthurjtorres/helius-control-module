@@ -10,6 +10,7 @@ import MenuModel from "./MenuModel";
 import ModuleModel from "./ModuleModel";
 import PermitModel from "./PermitModel";
 import UserAppRoleModel from "./UserAppRoleModel";
+import UserCompanyModel from "./UserCompanyModel";
 import UserModel from "./UserModel";
 import UserModuleModel from "./UserModuleModel";
 
@@ -27,6 +28,7 @@ MenuModel,
 ModuleModel,
 PermitModel,
 UserAppRoleModel,
+UserCompanyModel,
 UserModel,
 UserModuleModel,
 }
