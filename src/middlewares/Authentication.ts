@@ -54,6 +54,8 @@ export interface JwtPayload {
   modules: string[]; 
   roles: UserModuleRole[];
   allowedMenus: MenuPermission[];
+  /** Empresas visíveis (T18, ADR-021); ausente no token de serviço e nos anteriores à T18. `SISTEMA` não é filtrado. */
+  companyIds?: string[];
 }
 
 const sign = (payload: JwtPayload) => {
