@@ -12,6 +12,7 @@ import { enrichUserData } from "../services/integrations/UserAggregator";
 import bcrypt from "bcrypt";
 import db from "../database/models/index"
 import UserAppRoleModel from "../database/models/UserAppRoleModel";
+import UserCompanyModel from "../database/models/UserCompanyModel";
 import UserModuleModel from "../database/models/UserModuleModel";
 import AppRoleModel from "../database/models/AppRoleModel";
 import ModuleModel from "../database/models/ModuleModel";
@@ -227,7 +228,7 @@ class UserService {
 
   /**
    * Demissão (T20, `04` §6.2): desativa os usuários vinculados aos funcionários e remove
-   * `user_module` e `user_app_role` (tabelas de ligação, remoção física). Chamado pelo `registry`
+   * `user_module`, `user_app_role` e `user_company` (T18) (tabelas de ligação, remoção física). Chamado pelo `registry`
    * com token de serviço. O usuário de sistema nunca é tocado.
    * @param employeeIds Funcionários desligados.
    * @param updatedBy Usuário que desligou (vem do `registry`, que o tirou do próprio token).
@@ -258,6 +259,7 @@ class UserService {
       );
       await UserModuleModel.destroy({ where, transaction });
       await UserAppRoleModel.destroy({ where, transaction });
+      await UserCompanyModel.destroy({ where, transaction });
       await transaction.commit();
       return Response.ok("Usuários dos funcionários desligados desativados.", { deactivated: userIds });
     } catch (error: unknown) {

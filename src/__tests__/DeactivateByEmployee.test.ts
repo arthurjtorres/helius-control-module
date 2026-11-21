@@ -8,6 +8,7 @@ jest.mock('../database/models/UserModel', () => mockModel());
 jest.mock('../database/models/EmployeeUserModel', () => mockModel());
 jest.mock('../database/models/UserModuleModel', () => mockModel());
 jest.mock('../database/models/UserAppRoleModel', () => mockModel());
+jest.mock('../database/models/UserCompanyModel', () => mockModel());
 jest.mock('../database/models/ExternalUserModel', () => mockModel());
 jest.mock('../database/models/AppRoleModel', () => mockModel());
 jest.mock('../database/models/ModuleModel', () => mockModel());
@@ -20,6 +21,7 @@ import UserModel from '../database/models/UserModel';
 import EmployeeUserModel from '../database/models/EmployeeUserModel';
 import UserModuleModel from '../database/models/UserModuleModel';
 import UserAppRoleModel from '../database/models/UserAppRoleModel';
+import UserCompanyModel from '../database/models/UserCompanyModel';
 import { requireServiceToken } from '../middlewares/CheckPermission';
 import { JwtPayload } from '../middlewares/Authentication';
 
@@ -39,7 +41,7 @@ describe('UserService.deactivateByEmployee', () => {
     expect((await service.deactivateByEmployee(Array(5001).fill(EMP), ACTOR)).status).toBe(400);
   });
 
-  it('desativa o usuário e remove user_module e user_app_role na mesma transação, sem tocar no SISTEMA', async () => {
+  it('desativa o usuário e remove user_module, user_app_role e user_company na mesma transação, sem tocar no SISTEMA', async () => {
     m(EmployeeUserModel).findAll.mockResolvedValue([{ fkUserId: USER }]);
     m(UserModel).findAll.mockResolvedValue([{ userId: USER }]);
 
@@ -55,6 +57,7 @@ describe('UserService.deactivateByEmployee', () => {
     expect(opts.transaction).toBe(mockTx);
     expect(m(UserModuleModel).destroy.mock.calls[0][0].transaction).toBe(mockTx);
     expect(m(UserAppRoleModel).destroy.mock.calls[0][0].transaction).toBe(mockTx);
+    expect(m(UserCompanyModel).destroy.mock.calls[0][0]).toEqual({ where: { fkUserId: { [Op.in]: [USER] } }, transaction: mockTx });
     expect(mockTx.commit).toHaveBeenCalled();
   });
 
