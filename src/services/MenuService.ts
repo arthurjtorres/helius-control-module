@@ -1,4 +1,5 @@
 import { ModelStatic, Op } from "sequelize";
+import { ListQuery, activeWhere } from "../utils/ActiveFilter";
 import MenuModel from "../database/models/MenuModel";
 import ModuleModel from "../database/models/ModuleModel";
 import MenuInterface from "../database/interfaces/MenuInterface";
@@ -84,8 +85,8 @@ class MenuService {
     return Response.ok("Menu encontrado!", result);
   }
 
-  async findMenus(query: { menuName?: string; fkModuleId?: string }) {
-    const where: any = { activated: true };
+  async findMenus(query: { menuName?: string; fkModuleId?: string } & ListQuery) {
+    const where: any = { ...activeWhere(query) };
 
     if (query.menuName) {
       where.menuName = { [Op.iLike]: `%${query.menuName}%` };
