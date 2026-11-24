@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { listQuery } from "../utils/ActiveFilter";
 import { logError } from "../utils/logError";
 import Resp from "../utils/Response";
 import ModuleService from "../services/ModuleService";
@@ -68,7 +69,7 @@ class ModuleController {
 
   async findModules(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await this.service.findModules(req.query);
+      const result = await this.service.findModules(listQuery(req, res));
       return res.status(result.status).json(result);
     } catch (error) {
       logError("Erro ao buscar módulos", error);

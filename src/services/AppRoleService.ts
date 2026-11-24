@@ -1,4 +1,5 @@
 import { ModelStatic, Op } from "sequelize";
+import { ListQuery, activeWhere } from "../utils/ActiveFilter";
 import AppRoleModel from "../database/models/AppRoleModel";
 import AppRoleInterface from "../database/interfaces/AppRoleInterface";
 import Response from "../utils/Response";
@@ -76,8 +77,8 @@ class AppRoleService {
     return Response.ok("Função encontrada!", result);
   }
 
-  async findAppRoles(query: { appRoleName?: string }) {
-    const where: any = { activated: true };
+  async findAppRoles(query: { appRoleName?: string } & ListQuery) {
+    const where: any = { ...activeWhere(query) };
 
     if (query.appRoleName) {
       where.appRoleName = { [Op.iLike]: `%${query.appRoleName}%` };

@@ -1,4 +1,5 @@
 import { ModelStatic, Op } from "sequelize";
+import { ListQuery, activeWhere } from "../utils/ActiveFilter";
 import UserModel from "../database/models/UserModel";
 import UserInterface from "../database/interfaces/UserInterface";
 import UserValidation, { DeactivateByEmployeeValidation } from "./validations/UserValidation";
@@ -308,13 +309,13 @@ class UserService {
    * `fkEmployeeId` retorna só usuários ativos vinculados ao funcionário (`employee_user`);
    * usado pelo `registry` para bloquear a desativação de funcionário com usuário ativo.
    */
-  async findUsers(query: { userName?: string; email?: string; userType?: UserTypeEnum; fkEmployeeId?: string }) {
+  async findUsers(query: { userName?: string; email?: string; userType?: UserTypeEnum; fkEmployeeId?: string } & ListQuery) {
     if (query.fkEmployeeId && !UUID_REGEX.test(query.fkEmployeeId)) {
       return Response.badRequest("fkEmployeeId deve ser um UUID válido.");
     }
 
     try {
-      const where: any = { activated: true };
+      const where: any = { ...activeWhere(query) };
       if (query.userName) where.userName = { [Op.iLike]: `%${query.userName}%` };
       if (query.email) where.email = { [Op.iLike]: `%${query.email}%` };
       if (query.userType) where.userType = query.userType;

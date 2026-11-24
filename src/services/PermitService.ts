@@ -1,4 +1,5 @@
 import { ModelStatic, Op } from "sequelize";
+import { ListQuery, activeWhere } from "../utils/ActiveFilter";
 import PermitModel from "../database/models/PermitModel";
 import PermitInterface from "../database/interfaces/PermitInterface";
 import Response from "../utils/Response";
@@ -76,8 +77,8 @@ class PermitService {
     return Response.ok("Permissão encontrada!", result);
   }
 
-  async findPermits(query: Partial<Pick<PermitInterface, 'permitName'>>) {
-    const where: any = { activated: true };
+  async findPermits(query: Partial<Pick<PermitInterface, 'permitName'>> & ListQuery) {
+    const where: any = { ...activeWhere(query) };
 
     if (query.permitName) {
       where.permitName = { [Op.iLike]: `%${query.permitName}%` };

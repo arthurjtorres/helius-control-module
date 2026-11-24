@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { listQuery } from "../utils/ActiveFilter";
 import { logError } from "../utils/logError";
 import Resp from "../utils/Response";
 import UserService from "../services/UserService";
@@ -81,7 +82,7 @@ class UserController {
 
   async findUsers(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await this.service.findUsers(req.query);
+      const result = await this.service.findUsers(listQuery(req, res));
       return res.status(result.status).json(result);
     } catch (error) {
       logError("Erro ao buscar usuários", error);
