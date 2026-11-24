@@ -1,4 +1,5 @@
 import { ModelStatic, Op } from "sequelize";
+import { ListQuery, activeWhere } from "../utils/ActiveFilter";
 import ModuleModel from "../database/models/ModuleModel";
 import MenuModel from "../database/models/MenuModel";
 import ModuleInterface from "../database/interfaces/ModuleInterface";
@@ -82,8 +83,8 @@ class ModuleService {
     return Response.ok("Módulo encontrado!", result);
   }
 
-  async findModules(query: { moduleName?: string }) {
-    const where: any = { activated: true };
+  async findModules(query: { moduleName?: string } & ListQuery) {
+    const where: any = { ...activeWhere(query) };
 
     if (query.moduleName) {
       where.moduleName = { [Op.iLike]: `%${query.moduleName}%` };
