@@ -1,4 +1,5 @@
 import { ModelStatic, Op } from "sequelize";
+import { ListQuery, activeWhere } from "../utils/ActiveFilter";
 import ClearanceLevelModel from "../database/models/ClearanceLevelModel";
 import UserModel from "../database/models/UserModel";
 import ClearanceLevelInterface from "../database/interfaces/ClearanceLevelInterface";
@@ -84,8 +85,8 @@ class ClearanceLevelService {
     return Response.ok("Nível de acesso encontrado!", result);
   }
 
-  async findClearanceLevels(query: Partial<Pick<ClearanceLevelInterface, 'clearanceName'>>) {
-    const where: any = { activated: true };
+  async findClearanceLevels(query: Partial<Pick<ClearanceLevelInterface, 'clearanceName'>> & ListQuery) {
+    const where: any = { ...activeWhere(query) };
 
     if (query.clearanceName) {
       where.clearanceName = { [Op.iLike]: `%${query.clearanceName}%` };
