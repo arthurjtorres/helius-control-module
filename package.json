@@ -1,6 +1,6 @@
 {
   "name": "control-module",
-  "version": "0.17.3-beta",
+  "version": "0.17.4-beta",
   "description": "Módulo de controle operacional do sistema",
   "main": "src/server.ts",
   "repository": "https://github.com/NamelessMiojo/helius-control-module.git",
