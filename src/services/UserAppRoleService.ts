@@ -1,4 +1,4 @@
-import { ModelStatic, Op } from "sequelize";
+import { ModelStatic, WhereAttributeHash } from "sequelize";
 import UserAppRoleModel from "../database/models/UserAppRoleModel";
 import UserAppRoleInterface from "../database/interfaces/UserAppRoleInterface";
 import Response from "../utils/Response";
@@ -81,7 +81,7 @@ class UserAppRoleService {
     fkAppRoleId?: string;
     fkModuleId?: string;
   }) {
-    const where: any = {};
+    const where: WhereAttributeHash = {};
 
     if (query.fkUserId) {
       where.fkUserId = query.fkUserId;

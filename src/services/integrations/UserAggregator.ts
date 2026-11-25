@@ -2,10 +2,14 @@ import { getEmployeeById } from "./EmployeeService";
 import { getPersonById } from "./PersonService";
 import { logError } from "../../utils/logError";
 
-export const enrichUserData = async (user: any) => {
+/** Vínculos do usuário lidos aqui (associações incluídas no `toJSON()`). */
+type UserLinks = { EmployeeUser?: { fkEmployeeId?: string } | null; ExternalUser?: { fkPersonId?: string } | null };
+
+export const enrichUserData = async <T extends object>(user: T) => {
   try {
-    const employeeId = user?.EmployeeUser?.fkEmployeeId;
-    const personId = user?.ExternalUser?.fkPersonId;
+    const links = user as UserLinks;
+    const employeeId = links.EmployeeUser?.fkEmployeeId;
+    const personId = links.ExternalUser?.fkPersonId;
 
     const [employeeData, personData] = await Promise.all([
       employeeId ? getEmployeeById(employeeId) : null,

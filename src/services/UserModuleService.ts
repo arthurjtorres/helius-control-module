@@ -1,4 +1,4 @@
-import { ModelStatic, Op } from "sequelize";
+import { ModelStatic, WhereAttributeHash } from "sequelize";
 import UserModuleModel from "../database/models/UserModuleModel";
 import UserModuleInterface from "../database/interfaces/UserModuleInterface";
 import Response from "../utils/Response";
@@ -76,7 +76,7 @@ class UserModuleService {
   }
 
   async findUserModules(query: Partial<Pick<UserModuleInterface, 'fkUserId' | 'fkModuleId'>>) {
-    const where: any = {};
+    const where: WhereAttributeHash = {};
 
     if (query.fkUserId) where.fkUserId = query.fkUserId;
     if (query.fkModuleId) where.fkModuleId = query.fkModuleId;

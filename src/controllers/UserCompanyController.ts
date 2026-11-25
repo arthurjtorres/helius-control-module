@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { logError } from "../utils/logError";
 import Resp from "../utils/Response";
 import UserCompanyService from "../services/UserCompanyService";
@@ -6,7 +6,7 @@ import UserCompanyService from "../services/UserCompanyService";
 class UserCompanyController {
   private service = new UserCompanyService();
 
-  async create(req: Request, res: Response, next: NextFunction) {
+  async create(req: Request, res: Response) {
     try {
       const result = await this.service.create(req.body ?? {}, res.locals.user);
       return res.status(result.status).json(result);
@@ -17,7 +17,7 @@ class UserCompanyController {
     }
   }
 
-  async remove(req: Request, res: Response, next: NextFunction) {
+  async remove(req: Request, res: Response) {
     try {
       const result = await this.service.remove(req.params.userId, req.params.companyId, res.locals.user);
       return res.status(result.status).json(result);
@@ -28,7 +28,7 @@ class UserCompanyController {
     }
   }
 
-  async findByUser(req: Request, res: Response, next: NextFunction) {
+  async findByUser(req: Request, res: Response) {
     try {
       const result = await this.service.findByUser(req.query.fkUserId);
       return res.status(result.status).json(result);

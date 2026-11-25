@@ -1,4 +1,4 @@
-import { ModelStatic, Op } from "sequelize";
+import { ModelStatic, Op, WhereAttributeHash } from "sequelize";
 import { ListQuery, activeWhere } from "../utils/ActiveFilter";
 import PermitModel from "../database/models/PermitModel";
 import PermitInterface from "../database/interfaces/PermitInterface";
@@ -78,7 +78,7 @@ class PermitService {
   }
 
   async findPermits(query: Partial<Pick<PermitInterface, 'permitName'>> & ListQuery) {
-    const where: any = { ...activeWhere(query) };
+    const where: WhereAttributeHash = { ...activeWhere(query) };
 
     if (query.permitName) {
       where.permitName = { [Op.iLike]: `%${query.permitName}%` };

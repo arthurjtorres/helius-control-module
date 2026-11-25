@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { logError } from "../utils/logError";
 import Resp from "../utils/Response";
 import UserModuleService from "../services/UserModuleService";
@@ -6,7 +6,7 @@ import UserModuleService from "../services/UserModuleService";
 class UserModuleController {
   private service = new UserModuleService();
 
-  async createUserModule(req: Request, res: Response, next: NextFunction) {
+  async createUserModule(req: Request, res: Response) {
     try {
       const result = await this.service.createUserModule({ ...req.body, createdBy: res.locals.user.userId }, res.locals.user);
       return res.status(result.status).json(result);
@@ -17,7 +17,7 @@ class UserModuleController {
     }
   }
 
-  async updateUserModule(req: Request, res: Response, next: NextFunction) {
+  async updateUserModule(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.updateUserModule(id, { ...req.body, updatedBy: res.locals.user.userId }, res.locals.user);
@@ -29,7 +29,7 @@ class UserModuleController {
     }
   }
 
-  async deleteUserModule(req: Request, res: Response, next: NextFunction) {
+  async deleteUserModule(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.deleteUserModule(id, res.locals.user);
@@ -41,7 +41,7 @@ class UserModuleController {
     }
   }
 
-  async getUserModule(req: Request, res: Response, next: NextFunction) {
+  async getUserModule(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.getUserModule(id);
@@ -53,7 +53,7 @@ class UserModuleController {
     }
   }
 
-  async findUserModules(req: Request, res: Response, next: NextFunction) {
+  async findUserModules(req: Request, res: Response) {
     try {
       const result = await this.service.findUserModules(req.query);
       return res.status(result.status).json(result);

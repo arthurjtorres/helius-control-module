@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { logError } from "../utils/logError";
 import Resp from "../utils/Response";
 import UserAppRoleService from "../services/UserAppRoleService";
@@ -6,7 +6,7 @@ import UserAppRoleService from "../services/UserAppRoleService";
 class UserAppRoleController {
   private service = new UserAppRoleService();
 
-  async createUserAppRole(req: Request, res: Response, next: NextFunction) {
+  async createUserAppRole(req: Request, res: Response) {
     try {
       const result = await this.service.createUserAppRole({ ...req.body, createdBy: res.locals.user.userId }, res.locals.user);
       return res.status(result.status).json(result);
@@ -17,7 +17,7 @@ class UserAppRoleController {
     }
   }
 
-  async updateUserAppRole(req: Request, res: Response, next: NextFunction) {
+  async updateUserAppRole(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.updateUserAppRole(id, { ...req.body, updatedBy: res.locals.user.userId }, res.locals.user);
@@ -29,7 +29,7 @@ class UserAppRoleController {
     }
   }
 
-  async deleteUserAppRole(req: Request, res: Response, next: NextFunction) {
+  async deleteUserAppRole(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.deleteUserAppRole(id, res.locals.user);
@@ -41,7 +41,7 @@ class UserAppRoleController {
     }
   }
 
-  async getUserAppRole(req: Request, res: Response, next: NextFunction) {
+  async getUserAppRole(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.getUserAppRole(id);
@@ -53,7 +53,7 @@ class UserAppRoleController {
     }
   }
 
-  async findUserAppRoles(req: Request, res: Response, next: NextFunction) {
+  async findUserAppRoles(req: Request, res: Response) {
     try {
       const result = await this.service.findUserAppRoles(req.query);
       return res.status(result.status).json(result);

@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { listQuery } from "../utils/ActiveFilter";
 import { logError } from "../utils/logError";
 import Resp from "../utils/Response";
@@ -7,7 +7,7 @@ import ModuleService from "../services/ModuleService";
 class ModuleController {
   private service = new ModuleService();
 
-  async createModule(req: Request, res: Response, next: NextFunction) {
+  async createModule(req: Request, res: Response) {
     try {
       const result = await this.service.createModule({ ...req.body, createdBy: res.locals.user.userId });
       return res.status(result.status).json(result);
@@ -18,7 +18,7 @@ class ModuleController {
     }
   }
 
-  async updateModule(req: Request, res: Response, next: NextFunction) {
+  async updateModule(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.updateModule(id, { ...req.body, updatedBy: res.locals.user.userId });
@@ -30,7 +30,7 @@ class ModuleController {
     }
   }
 
-  async deleteModule(req: Request, res: Response, next: NextFunction) {
+  async deleteModule(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.deleteModule(id, res.locals.user.userId);
@@ -43,7 +43,7 @@ class ModuleController {
   }
 
   /** PATCH /:id/reactivate — reativa o registro (`activated = true`). */
-  async reactivateModule(req: Request, res: Response, next: NextFunction) {
+  async reactivateModule(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.reactivateModule(id, res.locals.user.userId);
@@ -55,7 +55,7 @@ class ModuleController {
     }
   }
 
-  async getModule(req: Request, res: Response, next: NextFunction) {
+  async getModule(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.getModule(id);
@@ -67,7 +67,7 @@ class ModuleController {
     }
   }
 
-  async findModules(req: Request, res: Response, next: NextFunction) {
+  async findModules(req: Request, res: Response) {
     try {
       const result = await this.service.findModules(listQuery(req, res));
       return res.status(result.status).json(result);
