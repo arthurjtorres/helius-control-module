@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { logError } from "../utils/logError";
 import Resp from "../utils/Response";
 import AppRolePermitService from "../services/AppRolePermitService";
@@ -6,7 +6,7 @@ import AppRolePermitService from "../services/AppRolePermitService";
 class AppRolePermitController {
   private service = new AppRolePermitService();
 
-  async createAppRolePermit(req: Request, res: Response, next: NextFunction) {
+  async createAppRolePermit(req: Request, res: Response) {
     try {
       const result = await this.service.createAppRolePermit({ ...req.body, createdBy: res.locals.user.userId });
       return res.status(result.status).json(result);
@@ -17,7 +17,7 @@ class AppRolePermitController {
     }
   }
 
-  async updateAppRolePermit(req: Request, res: Response, next: NextFunction) {
+  async updateAppRolePermit(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.updateAppRolePermit(id, { ...req.body, updatedBy: res.locals.user.userId });
@@ -29,7 +29,7 @@ class AppRolePermitController {
     }
   }
 
-  async deleteAppRolePermit(req: Request, res: Response, next: NextFunction) {
+  async deleteAppRolePermit(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.deleteAppRolePermit(id);
@@ -41,7 +41,7 @@ class AppRolePermitController {
     }
   }
 
-  async getAppRolePermit(req: Request, res: Response, next: NextFunction) {
+  async getAppRolePermit(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.getAppRolePermit(id);
@@ -53,7 +53,7 @@ class AppRolePermitController {
     }
   }
 
-  async findAppRolePermits(req: Request, res: Response, next: NextFunction) {
+  async findAppRolePermits(req: Request, res: Response) {
     try {
       const result = await this.service.findAppRolePermits(req.query);
       return res.status(result.status).json(result);

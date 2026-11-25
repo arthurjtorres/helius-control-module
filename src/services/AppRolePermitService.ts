@@ -1,4 +1,4 @@
-import { ModelStatic, Op } from "sequelize";
+import { ModelStatic, WhereAttributeHash } from "sequelize";
 import AppRolePermitModel from "../database/models/AppRolePermitModel";
 import AppRolePermitInterface from "../database/interfaces/AppRolePermitInterface";
 import Response from "../utils/Response";
@@ -58,7 +58,7 @@ class AppRolePermitService {
     fkMenuId?: string;
     fkPermitId?: string;
   }) {
-    const where: any = {};
+    const where: WhereAttributeHash = {};
 
     if (query.fkAppRoleId) where.fkAppRoleId = query.fkAppRoleId;
     if (query.fkMenuId) where.fkMenuId = query.fkMenuId;
