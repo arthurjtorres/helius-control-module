@@ -1,4 +1,5 @@
 const mockFindOne = jest.fn();
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- parâmetro tipa o mock.calls
 const mockSign = jest.fn((_p: unknown) => 'token');
 const mockGranted = jest.fn();
 const mockGroup = jest.fn();

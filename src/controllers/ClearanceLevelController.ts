@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { listQuery } from "../utils/ActiveFilter";
 import { logError } from "../utils/logError";
 import Resp from "../utils/Response";
@@ -7,7 +7,7 @@ import ClearanceLevelService from "../services/ClearanceLevelService";
 class ClearanceLevelController {
   private service = new ClearanceLevelService();
 
-  async createClearanceLevel(req: Request, res: Response, next: NextFunction) {
+  async createClearanceLevel(req: Request, res: Response) {
     try {
       const result = await this.service.createClearanceLevel({ ...req.body, createdBy: res.locals.user.userId });
       return res.status(result.status).json(result);
@@ -18,7 +18,7 @@ class ClearanceLevelController {
     }
   }
 
-  async updateClearanceLevel(req: Request, res: Response, next: NextFunction) {
+  async updateClearanceLevel(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.updateClearanceLevel(id, { ...req.body, updatedBy: res.locals.user.userId });
@@ -30,7 +30,7 @@ class ClearanceLevelController {
     }
   }
 
-  async deleteClearanceLevel(req: Request, res: Response, next: NextFunction) {
+  async deleteClearanceLevel(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.deleteClearanceLevel(id, res.locals.user.userId);
@@ -43,7 +43,7 @@ class ClearanceLevelController {
   }
 
   /** PATCH /:id/reactivate — reativa o registro (`activated = true`). */
-  async reactivateClearanceLevel(req: Request, res: Response, next: NextFunction) {
+  async reactivateClearanceLevel(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.reactivateClearanceLevel(id, res.locals.user.userId);
@@ -55,7 +55,7 @@ class ClearanceLevelController {
     }
   }
 
-  async getClearanceLevel(req: Request, res: Response, next: NextFunction) {
+  async getClearanceLevel(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.getClearanceLevel(id);
@@ -67,7 +67,7 @@ class ClearanceLevelController {
     }
   }
 
-  async findClearanceLevels(req: Request, res: Response, next: NextFunction) {
+  async findClearanceLevels(req: Request, res: Response) {
     try {
       const result = await this.service.findClearanceLevels(listQuery(req, res));
       return res.status(result.status).json(result);

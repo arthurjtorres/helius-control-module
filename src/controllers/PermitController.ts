@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { listQuery } from "../utils/ActiveFilter";
 import { logError } from "../utils/logError";
 import Resp from "../utils/Response";
@@ -7,7 +7,7 @@ import PermitService from "../services/PermitService";
 class PermitController {
   private service = new PermitService();
 
-  async createPermit(req: Request, res: Response, next: NextFunction) {
+  async createPermit(req: Request, res: Response) {
     try {
       const result = await this.service.createPermit({ ...req.body, createdBy: res.locals.user.userId });
       return res.status(result.status).json(result);
@@ -18,7 +18,7 @@ class PermitController {
     }
   }
 
-  async updatePermit(req: Request, res: Response, next: NextFunction) {
+  async updatePermit(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.updatePermit(id, { ...req.body, updatedBy: res.locals.user.userId });
@@ -30,7 +30,7 @@ class PermitController {
     }
   }
 
-  async deletePermit(req: Request, res: Response, next: NextFunction) {
+  async deletePermit(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.deletePermit(id, res.locals.user.userId);
@@ -43,7 +43,7 @@ class PermitController {
   }
 
   /** PATCH /:id/reactivate — reativa o registro (`activated = true`). */
-  async reactivatePermit(req: Request, res: Response, next: NextFunction) {
+  async reactivatePermit(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.reactivatePermit(id, res.locals.user.userId);
@@ -55,7 +55,7 @@ class PermitController {
     }
   }
 
-  async getPermit(req: Request, res: Response, next: NextFunction) {
+  async getPermit(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.getPermit(id);
@@ -67,7 +67,7 @@ class PermitController {
     }
   }
 
-  async findPermits(req: Request, res: Response, next: NextFunction) {
+  async findPermits(req: Request, res: Response) {
     try {
       const result = await this.service.findPermits(listQuery(req, res));
       return res.status(result.status).json(result);

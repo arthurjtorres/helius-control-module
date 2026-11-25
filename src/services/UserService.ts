@@ -1,4 +1,4 @@
-import { ModelStatic, Op } from "sequelize";
+import { ModelStatic, Op, WhereAttributeHash } from "sequelize";
 import { ListQuery, activeWhere } from "../utils/ActiveFilter";
 import UserModel from "../database/models/UserModel";
 import UserInterface from "../database/interfaces/UserInterface";
@@ -315,7 +315,7 @@ class UserService {
     }
 
     try {
-      const where: any = { ...activeWhere(query) };
+      const where: WhereAttributeHash = { ...activeWhere(query) };
       if (query.userName) where.userName = { [Op.iLike]: `%${query.userName}%` };
       if (query.email) where.email = { [Op.iLike]: `%${query.email}%` };
       if (query.userType) where.userType = query.userType;

@@ -1,4 +1,4 @@
-import { ModelStatic, Op } from "sequelize";
+import { ModelStatic, Op, WhereAttributeHash } from "sequelize";
 import { ListQuery, activeWhere } from "../utils/ActiveFilter";
 import ModuleModel from "../database/models/ModuleModel";
 import MenuModel from "../database/models/MenuModel";
@@ -84,7 +84,7 @@ class ModuleService {
   }
 
   async findModules(query: { moduleName?: string } & ListQuery) {
-    const where: any = { ...activeWhere(query) };
+    const where: WhereAttributeHash = { ...activeWhere(query) };
 
     if (query.moduleName) {
       where.moduleName = { [Op.iLike]: `%${query.moduleName}%` };

@@ -1,4 +1,4 @@
-import { ModelStatic, Op } from "sequelize";
+import { ModelStatic, Op, WhereAttributeHash } from "sequelize";
 import { ListQuery, activeWhere } from "../utils/ActiveFilter";
 import ClearanceLevelModel from "../database/models/ClearanceLevelModel";
 import UserModel from "../database/models/UserModel";
@@ -86,7 +86,7 @@ class ClearanceLevelService {
   }
 
   async findClearanceLevels(query: Partial<Pick<ClearanceLevelInterface, 'clearanceName'>> & ListQuery) {
-    const where: any = { ...activeWhere(query) };
+    const where: WhereAttributeHash = { ...activeWhere(query) };
 
     if (query.clearanceName) {
       where.clearanceName = { [Op.iLike]: `%${query.clearanceName}%` };
