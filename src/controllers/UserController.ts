@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { listQuery } from "../utils/ActiveFilter";
 import { logError } from "../utils/logError";
 import Resp from "../utils/Response";
@@ -8,7 +8,7 @@ import { JwtPayload } from "../middlewares/Authentication";
 class UserController {
  private service = new UserService();
 
-  async createUser(req: Request, res: Response, next: NextFunction) {
+  async createUser(req: Request, res: Response) {
     try {
       const result = await this.service.createUser({ ...req.body, createdBy: (res.locals.user as JwtPayload).userId }, res.locals.user);
       return res.status(result.status).json(result);
@@ -19,7 +19,7 @@ class UserController {
     }
   }
 
-  async updateUser(req: Request, res: Response, next: NextFunction) {
+  async updateUser(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.updateUser(id, { ...req.body, updatedBy: (res.locals.user as JwtPayload).userId }, res.locals.user);
@@ -31,7 +31,7 @@ class UserController {
     }
   }
 
-  async deleteUser(req: Request, res: Response, next: NextFunction) {
+  async deleteUser(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.deleteUser(id, res.locals.user);
@@ -44,7 +44,7 @@ class UserController {
   }
 
   /** POST /deactivate-by-employee — demissão (T20); só token de serviço. */
-  async deactivateByEmployee(req: Request, res: Response, next: NextFunction) {
+  async deactivateByEmployee(req: Request, res: Response) {
     try {
       const result = await this.service.deactivateByEmployee(req.body?.employeeIds, req.body?.updatedBy);
       return res.status(result.status).json(result);
@@ -56,7 +56,7 @@ class UserController {
   }
 
   /** PATCH /:id/reactivate — reativa o registro (`activated = true`). */
-  async reactivateUser(req: Request, res: Response, next: NextFunction) {
+  async reactivateUser(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.reactivateUser(id, res.locals.user);
@@ -68,7 +68,7 @@ class UserController {
     }
   }
 
-  async getUser(req: Request, res: Response, next: NextFunction) {
+  async getUser(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const result = await this.service.getUser(id);
@@ -80,7 +80,7 @@ class UserController {
     }
   }
 
-  async findUsers(req: Request, res: Response, next: NextFunction) {
+  async findUsers(req: Request, res: Response) {
     try {
       const result = await this.service.findUsers(listQuery(req, res));
       return res.status(result.status).json(result);

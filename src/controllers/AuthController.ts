@@ -18,7 +18,7 @@ class AuthController {
 
       const result: StandardResponse = await this.service.login(credentials.login, credentials.password);
 
-      const responseBody: any = {
+      const responseBody: { message: string; data?: unknown } = {
         message: result.message
       };
 
